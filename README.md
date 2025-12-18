@@ -37,3 +37,18 @@ Send a user message to the chatbot and get an AI-generated response.
   "answer": "AI generated answer is here"
 }
 ```
+
+## Debugging FastAPI in IntelliJ
+Add this to the end of main.py and then run the file via debug configuration
+```python
+# THIS is the important part for debugging
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(
+        app,                     # pass the app object directly
+        host="127.0.0.1",
+        port=8000,
+        reload=False,             # MUST be False for debugger
+        log_level="debug",
+    )
+```
