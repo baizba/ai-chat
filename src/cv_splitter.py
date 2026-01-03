@@ -16,21 +16,19 @@ class CvSplitter:
         current_node = None
 
         for line in lines:
-            print(repr(line))
             if line.strip().startswith('###'):
                 current_node = CVNode()
-                current_node.text = ''
                 current_node.title = line.strip('###').strip()
                 current_node.parent = last_2nd_level_node
+                last_2nd_level_node.children.append(current_node)
             elif line.strip().startswith('##'):
                 current_node = CVNode()
-                current_node.text = ''
                 current_node.title = line.strip('##').strip()
                 current_node.parent = root_node
+                root_node.children.append(current_node)
                 last_2nd_level_node = current_node
             elif line.strip().startswith('#'):
                 current_node = CVNode()
-                current_node.text = ''
                 current_node.title = line.strip('#').strip()
                 current_node.parent = None
                 root_node = current_node
