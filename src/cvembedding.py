@@ -22,7 +22,7 @@ class MyEmbeddingFunction(EmbeddingFunction):
 
 def to_chroma_documents(root_node: CVNode) -> list:
     chroma_docs = []
-    nodes_to_process = deque([root_node])
+    nodes_to_process = deque(root_node.children) # skip the root node completely as it does not give anything meaningful
 
     while len(nodes_to_process) > 0:
         current_node = nodes_to_process.popleft()
@@ -32,15 +32,16 @@ def to_chroma_documents(root_node: CVNode) -> list:
                 "path": current_node.get_path(),
                 "doc_type": "cv"
             }
-            if current_node.level == CVNodeLevel.ROOT:  # this means root node
-                doc_content = "Document: " + current_node.title
-            elif current_node.level == CVNodeLevel.SECTION:  # this means section (middle node)
-                doc_content = "Document: " + current_node.parent.title + "\n" + "Section: " + current_node.title
-                metadata["section"] = current_node.title
+
+            current_node_title_clean = current_node.title.lstrip("#").strip()
+            if current_node.level == CVNodeLevel.SECTION:  # this means section (middle node)
+                doc_content = "Section: " + current_node_title_clean
+                metadata["section"] = current_node_title_clean
             elif current_node.level == CVNodeLevel.SUBSECTION:  # this means subsection (3rd level node)
-                doc_content = "Document: " + current_node.parent.parent.title + "\n" + "Section: " + current_node.parent.title + "\n" + "Subsection: " + current_node.title
-                metadata["section"] = current_node.parent.title
-                metadata["subsection"] = current_node.title
+                parent_title_clean = current_node.parent.title.lstrip("#").strip()
+                doc_content = "Section: " + parent_title_clean + "\n" + "Subsection: " + current_node_title_clean
+                metadata["section"] = parent_title_clean
+                metadata["subsection"] = current_node_title_clean
             else:
                 fail(f"should not be here. Node {current_node.id} is invalid")
 
@@ -95,7 +96,7 @@ class CVEmbedding:
     def perform_query(self, query) -> ChatResponse:
         result_raw = self.collection.query(
             query_texts=[query],  # Chroma will embed this for you
-            n_results=3  # how many results to return
+            n_results=5  # how many results to return
         )
         return ChatResponse(documents=result_raw["documents"][0], distances=result_raw["distances"][0])
 
