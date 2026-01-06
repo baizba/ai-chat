@@ -1,4 +1,4 @@
-from src.cv_splitter import CvSplitter
+from cv_splitter import CvSplitter
 
 def test_simple_content():
     # prepare

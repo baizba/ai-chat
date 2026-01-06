@@ -1,13 +1,13 @@
-import datetime
 import time
 import uuid
 from contextlib import contextmanager
+from typing import Any
 
 import structlog
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
-from LocalEmbeddings import LocalEmbeddings
+from cvembedding import CVEmbedding
 from models import ChatRequest
 from models import ChatResponse
 
@@ -16,8 +16,11 @@ log = structlog.get_logger()
 app = FastAPI()
 
 # start end execute embedding of local texts
-local_embeddings = LocalEmbeddings()
-local_embeddings.perform_embeddings()
+# local_embeddings = LocalEmbeddings()
+# local_embeddings.perform_embeddings()
+
+cv_embedding = CVEmbedding()
+cv_embedding.perform_embeddings()
 
 app.add_middleware(
     CORSMiddleware,
@@ -35,7 +38,7 @@ def measure_time():
 
 
 @app.post("/chat", response_model=ChatResponse)
-async def get_hello(request: ChatRequest):
+async def chat(request: ChatRequest):
     request_id = str(uuid.uuid4())
 
     request_log = log.bind(
@@ -52,7 +55,7 @@ async def get_hello(request: ChatRequest):
     )
 
     with measure_time() as elapsed_time:
-        response = local_embeddings.perform_query(request.message)
+        response = cv_embedding.perform_query(request.message)
 
     request_log.info(
         "llm.chat.response",
@@ -61,3 +64,8 @@ async def get_hello(request: ChatRequest):
     )
 
     return response
+
+
+@app.get("/get_chroma_docs")
+async def get_chroma_docs() -> list[dict[str, Any]]:
+    return cv_embedding.get_docs_raw()
