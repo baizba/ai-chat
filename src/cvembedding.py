@@ -54,8 +54,8 @@ def to_chroma_documents(root_node: CVNode) -> list:
             }
             chroma_docs.append(chroma_doc)
 
-            if len(current_node.children) > 0:
-                nodes_to_process.extend(current_node.children)
+        if len(current_node.children) > 0:
+            nodes_to_process.extend(current_node.children)
 
     return chroma_docs
 
