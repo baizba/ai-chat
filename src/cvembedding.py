@@ -66,7 +66,7 @@ class CVEmbedding:
         self.collection = None
 
         # in-memory chroma
-        self.client = chromadb.EphemeralClient()
+        self.client = chromadb.HttpClient(host="localhost", port=8100)
 
         # embedding model
         self.model = SentenceTransformer('all-MiniLM-L6-v2')
@@ -90,7 +90,7 @@ class CVEmbedding:
             documents.append(doc["document"])
             metadatas.append(doc["metadata"])
 
-        self.collection = self.client.create_collection(name="cv_data", embedding_function=self.embedding_function)
+        self.collection = self.client.get_or_create_collection(name="cv_data", embedding_function=self.embedding_function)
         self.collection.add(ids=ids, documents=documents, metadatas=metadatas)
 
     def perform_query(self, query) -> ChatResponse:
