@@ -4,6 +4,7 @@ from enum import Enum
 
 from pydantic import BaseModel
 
+
 # fastapi request
 class ChatRequest(BaseModel):
     message: str

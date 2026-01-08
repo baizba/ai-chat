@@ -1,13 +1,14 @@
 import time
 import uuid
 from contextlib import contextmanager
+from http import HTTPStatus
 from typing import Any
 
 import structlog
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
-from cvembedding import CVEmbedding
+from cv_service import CVService
 from models import ChatRequest
 from models import ChatResponse
 
@@ -15,12 +16,8 @@ log = structlog.get_logger()
 
 app = FastAPI()
 
-# start end execute embedding of local texts
-# local_embeddings = LocalEmbeddings()
-# local_embeddings.perform_embeddings()
+cv_service = CVService()
 
-cv_embedding = CVEmbedding()
-cv_embedding.perform_embeddings()
 
 app.add_middleware(
     CORSMiddleware,
@@ -55,7 +52,7 @@ async def chat(request: ChatRequest):
     )
 
     with measure_time() as elapsed_time:
-        response = cv_embedding.perform_query(request.message)
+        response = cv_service.query(request.message)
 
     request_log.info(
         "llm.chat.response",
@@ -66,6 +63,13 @@ async def chat(request: ChatRequest):
     return response
 
 
-@app.get("/get_chroma_docs")
+@app.get("/admin/docs/raw")
 async def get_chroma_docs() -> list[dict[str, Any]]:
-    return cv_embedding.get_docs_raw()
+    return cv_service.get_docs_raw()
+
+
+@app.post("/admin/reindex", status_code=HTTPStatus.NO_CONTENT)
+async def reindex():
+    log.info("admin.reindex.started")
+    cv_service.index_cv()
+    log.info("admin.reindex.finished")

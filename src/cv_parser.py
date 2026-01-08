@@ -7,13 +7,13 @@ def stable_id(value: str) -> str:
     return hashlib.sha256(value.encode("utf-8")).hexdigest()
 
 
-class CvSplitter:
+class CVParser:
     cv_content: str
 
     def __init__(self, cv: str):
         self.cv_content = cv.strip()
 
-    def build_doc_tree(self) -> CVNode:
+    def build_tree(self) -> CVNode:
         lines = self.cv_content.splitlines()
         root_node = CVNode()
         last_2nd_level_node = CVNode()

@@ -1,4 +1,4 @@
-from cv_splitter import CvSplitter
+from cv_parser import CVParser
 
 def test_simple_content():
     # prepare
@@ -23,8 +23,8 @@ def test_simple_content():
     """
 
     # tests
-    splitter = CvSplitter(content)
-    tree = splitter.build_doc_tree()
+    splitter = CVParser(content)
+    tree = splitter.build_tree()
 
     #verify
     assert len(tree.children) == 3

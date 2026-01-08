@@ -1,11 +1,10 @@
 from collections import deque
 
 import chromadb
-from Tools.scripts.ndiff import fail
 from chromadb import EmbeddingFunction, Documents, Embeddings
 from sentence_transformers import SentenceTransformer
 
-from cv_splitter import CvSplitter
+from cv_parser import CVParser
 from models import CVNode, CVNodeLevel, ChatResponse
 
 
@@ -43,7 +42,7 @@ def to_chroma_documents(root_node: CVNode) -> list:
                 metadata["section"] = parent_title_clean
                 metadata["subsection"] = current_node_title_clean
             else:
-                fail(f"should not be here. Node {current_node.id} is invalid")
+                raise RuntimeError(f"should not be here. Node {current_node.id} is invalid")
 
             doc_content += "\n\n" + current_node.text.strip()  # content of the document itself
 
@@ -60,25 +59,25 @@ def to_chroma_documents(root_node: CVNode) -> list:
     return chroma_docs
 
 
-class CVEmbedding:
+class CVService:
     def __init__(self) -> None:
-        # chroma collection
-        self.collection = None
-
-        # in-memory chroma
+        # chroma connection
         self.client = chromadb.HttpClient(host="localhost", port=8100)
 
         # embedding model
-        self.model = SentenceTransformer('all-MiniLM-L6-v2')
+        model = SentenceTransformer('all-MiniLM-L6-v2')
 
-        self.embedding_function = MyEmbeddingFunction(self.model)
+        # chroma collection
+        embedding_function = MyEmbeddingFunction(model)
+        self.collection = self.client.get_or_create_collection(name="cv_data", embedding_function=embedding_function)
 
-    def perform_embeddings(self) -> None:
+    # here we embed the cv into chroma
+    def index_cv(self) -> None:
         with open("cv/Extended_CV.md", "r", encoding="utf-8") as f:
             content = f.read()
 
-        cv_splitter = CvSplitter(content)
-        root = cv_splitter.build_doc_tree()
+        cv_splitter = CVParser(content)
+        root = cv_splitter.build_tree()
         chroma_documents = to_chroma_documents(root)
 
         ids = []
@@ -90,10 +89,9 @@ class CVEmbedding:
             documents.append(doc["document"])
             metadatas.append(doc["metadata"])
 
-        self.collection = self.client.get_or_create_collection(name="cv_data", embedding_function=self.embedding_function)
         self.collection.add(ids=ids, documents=documents, metadatas=metadatas)
 
-    def perform_query(self, query) -> ChatResponse:
+    def query(self, query) -> ChatResponse:
         result_raw = self.collection.query(
             query_texts=[query],  # Chroma will embed this for you
             n_results=5  # how many results to return
