@@ -1,0 +1,7 @@
+fastapi
+structlog
+starlette
+transformers
+langchain
+langchain-huggingface
+torch
