@@ -14,8 +14,13 @@ class ChatRequest(BaseModel):
 
 # fastapi response
 class ChatResponse(BaseModel):
-    documents: list[str]
-    distances: list[float]
+    response: str
+
+
+class VectorSearchResult:
+    def __init__(self, documents: list[str], distances: list[float]):
+        self.documents = documents
+        self.distances = distances
 
 
 # used for nodes (node level)

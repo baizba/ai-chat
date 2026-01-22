@@ -18,7 +18,8 @@ class LLMService:
 
     def answer(self, question: str, context: str) -> str:
         final_prompt = f"""<|system|>
-You are a helpful assistant. Answer only using the provided context.<|end|>
+You are a helpful assistant. Answer only using the provided context.
+If you can not find the answer then politely reply that you did not find the information that was asked.<|end|>
 <|user|>
 Context: {context}
 Question: {question}<|end|>
@@ -40,7 +41,7 @@ Question: {question}<|end|>
             in_tokens=len(self.generator_pipeline.tokenizer.encode(final_prompt)),
             out_tokens=len(self.generator_pipeline.tokenizer.encode(final_response)),
             model=self.generator_pipeline.model.config.name_or_path,
-            duration_ms=elapsed_time()
+            duration_ms=round(elapsed_time())
         )
 
         return final_response

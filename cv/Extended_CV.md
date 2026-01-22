@@ -80,10 +80,18 @@ Served as Senior Developer in the beginning and moved to Architect-Role. Develop
 - A Basic Training in Communication (2012)
 
 ## Technical Skills (Technical knowledge)
-**Languages & Frameworks:** Java, Spring, JavaScript, TypeScript, Groovy, Python 
-**Tools & Platforms:** Camunda 7 & 8 (Modeler, Operate, Tasklist), Maven, Docker, Kubernetes, GitHub, CI/CD (Jenkins), AWS. OpenAPI, Azure, REST/SOAP, Kafka
-**Databases:** MySQL, SQL Express, MongoDB, Oracle
-**Concepts & Practices:** BPMN, TDD, Agile/SCRUM, DevOps mindset ("you build it, you run it"), Event Driven Design
+
+### Languages & Frameworks 
+Java, Spring, JavaScript, TypeScript, Groovy, Python 
+
+### Tools & Platforms
+Camunda 7 & 8 (Modeler, Operate, Tasklist), Maven, Docker, Kubernetes, GitHub, CI/CD (Jenkins), AWS. OpenAPI, Azure, REST/SOAP, Kafka
+
+### Databases
+MySQL, SQL Express, MongoDB, Oracle
+
+### Concepts & Practices
+BPMN, TDD, Agile/SCRUM, DevOps mindset ("you build it, you run it"), Event Driven Design
 
 
 ## Professional Highlights

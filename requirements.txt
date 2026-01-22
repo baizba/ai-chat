@@ -4,4 +4,6 @@ starlette
 transformers
 langchain
 langchain-huggingface
-torch
+
+chromadb
+sentence-transformers
