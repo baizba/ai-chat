@@ -1,4 +1,5 @@
 from collections import deque
+from typing import Any
 
 import chromadb
 import structlog
@@ -6,8 +7,9 @@ from chromadb import EmbeddingFunction, Documents, Embeddings
 from sentence_transformers import SentenceTransformer
 
 from cv_parser import CVParser
-from models import CVNode, CVNodeLevel, ChatResponse, VectorSearchResult
+from models import CVNode, CVNodeLevel, VectorSearchResult
 
+PRECISION_GAP = 0.15
 N_RESULTS = 3
 CV_DATA = "cv_data"
 
@@ -65,6 +67,33 @@ def to_chroma_documents(root_node: CVNode) -> list:
     return chroma_docs
 
 
+# filter out docs if the distance is too large from the first doc (easy way to improve contexts)
+def filter_by_base_distance(distances: list[float], documents: list[str]) -> tuple[list[Any], list[Any]]:
+    # distances and documents must align
+    if not distances or not documents:
+        return [], []
+    assert len(distances) == len(documents), "Distances and documents must align"
+
+    filtered_docs = [documents[0]]
+    filtered_distances = [distances[0]]
+    base_distance = distances[0]
+    for doc, dist in zip(documents[1:], distances[1:]):
+        if dist - base_distance < PRECISION_GAP:
+            filtered_docs.append(doc)
+            filtered_distances.append(dist)
+    return filtered_docs, filtered_distances
+
+
+def calc_separations(distances) -> list[float]:
+    result = []
+    prev_distance = distances[0]
+    for dist in distances[1:]:
+        result.append(round(dist - prev_distance, 5))
+        prev_distance = dist
+
+    return result
+
+
 class CVService:
     def __init__(self) -> None:
         # chroma connection
@@ -118,17 +147,25 @@ class CVService:
         for md in result_raw["metadatas"][0]:
             paths.append(md["path"])
 
+        distances = result_raw["distances"][0]
+        documents = result_raw["documents"][0]
+        ids = result_raw["ids"][0]
+
+        filtered_docs, filtered_distances = filter_by_base_distance(distances, documents)
+
         log.info(
             "rag.retrieval",
             request_id=request_id,
             query=query,
             top_k=N_RESULTS,
-            doc_ids=result_raw["ids"],
-            distances=result_raw["distances"][0],
-            path=paths
+            doc_ids=ids,
+            distances=distances,
+            path=paths,
+            kept=len(filtered_docs),
+            separations=calc_separations(distances)
         )
 
-        return VectorSearchResult(documents=result_raw["documents"][0], distances=result_raw["distances"][0])
+        return VectorSearchResult(documents=filtered_docs, distances=filtered_distances)
 
     def get_docs_raw(self) -> list:
         chroma_docs = self.collection.get()
