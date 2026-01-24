@@ -19,6 +19,7 @@ class LLMService:
     def answer(self, question: str, context: str) -> str:
         final_prompt = f"""<|system|>
 You are a helpful assistant. Answer only using the provided context.
+This context is from the CV and describes professional experience of Branislav Vidovic.
 If you can not find the answer then politely reply that you did not find the information that was asked.<|end|>
 <|user|>
 Context: {context}
