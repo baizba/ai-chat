@@ -4,12 +4,9 @@ services:
     ports:
       - "8100:8000"
     volumes:
-      - chroma_data:/chroma/chroma
+      - /data/chroma:/data
     networks:
       - internal
 
 networks:
   internal:
-
-volumes:
-  chroma_data:
