@@ -1,9 +1,9 @@
 fastapi
+uvicorn
 structlog
 starlette
 transformers
 langchain
 langchain-huggingface
-
 chromadb
 sentence-transformers
