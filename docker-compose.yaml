@@ -8,5 +8,30 @@ services:
     networks:
       - internal
 
+  ai-chat-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ai-chat-server
+    container_name: ai-chat-server
+    ports:
+      - "8100:8100"
+    environment:
+      - HF_TOKEN=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
+      - HF_HOME=/data/huggingface
+      - HF_HUB_CACHE=/data/huggingface/hub
+    volumes:
+      - /data/huggingface:/data/huggingface
+    networks:
+      - internal
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
+    depends_on:
+      - chroma
+
 networks:
   internal:
