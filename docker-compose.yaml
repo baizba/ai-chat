@@ -2,7 +2,7 @@ services:
   chroma:
     image: chromadb/chroma
     ports:
-      - "8100:8000"
+      - "8000:8000"
     volumes:
       - /data/chroma:/data
     networks:

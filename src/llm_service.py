@@ -13,7 +13,7 @@ def measure_time():
 
 class LLMService:
     def __init__(self):
-        self.generator_pipeline = pipeline("text-generation", "microsoft/Phi-3-mini-4k-instruct", device=0)
+        self.generator_pipeline = pipeline("text-generation", "microsoft/Phi-3-mini-4k-instruct", device_map="auto", dtype="auto")
         self.log = structlog.getLogger()
 
     def answer(self, question: str, context: str) -> str:

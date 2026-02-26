@@ -98,7 +98,7 @@ def calc_separation_from_first(distances: list[float]) -> list[float]:
 class CVService:
     def __init__(self) -> None:
         # chroma connection
-        self.client = chromadb.HttpClient(host="localhost", port=8100)
+        self.client = chromadb.HttpClient(host="chroma", port=8000)
 
         # embedding model
         model = SentenceTransformer('all-MiniLM-L6-v2')
