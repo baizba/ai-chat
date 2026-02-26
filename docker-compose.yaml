@@ -24,12 +24,6 @@ services:
       - /data/huggingface:/data/huggingface
     networks:
       - internal
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              capabilities: [gpu]
     depends_on:
       - chroma
 
