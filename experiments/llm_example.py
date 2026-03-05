@@ -1,6 +1,6 @@
 import torch
 
-from ai_chat.llm_service import LLMService
+from ai_chat.llm.llm_service import LLMService
 
 print(torch.cuda.is_available())
 print(torch.cuda.get_device_name(0))

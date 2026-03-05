@@ -9,7 +9,7 @@ from starlette.middleware.cors import CORSMiddleware
 
 from ai_chat.retrieval.cv_service import CvService
 from ai_chat.indexing.cv_indexing_service import CvIndexingService
-from ai_chat.llm_service import LLMService
+from ai_chat.llm.llm_service import LLMService
 from ai_chat.models import ChatRequest
 from ai_chat.models import ChatResponse
 from ai_chat.vectordb.cv_repository import CvRepository
