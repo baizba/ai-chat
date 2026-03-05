@@ -1,7 +1,7 @@
 from collections import deque
 
 from ai_chat.indexing.cv_parser import CVParser
-from ai_chat.models import CVNode, CVNodeLevel
+from ai_chat.indexing.models import CVNode, CVNodeLevel
 from ai_chat.vectordb.cv_repository import CvRepository
 
 

@@ -1,6 +1,6 @@
 import structlog
 
-from ai_chat.models import VectorSearchResult
+from ai_chat.retrieval.models import VectorSearchResult
 from ai_chat.vectordb.cv_repository import CvRepository
 from ai_chat.vectordb.models import RetrievalResult, CvDataItem
 
