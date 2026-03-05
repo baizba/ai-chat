@@ -43,5 +43,3 @@ def test_simple_content():
 
     assert tree.children[2].title == "## Highlights"
     assert tree.children[2].text.strip() == 'Communicates with Cats. Talks to cows.'
-
-test_simple_content()
