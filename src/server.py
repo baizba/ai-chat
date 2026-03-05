@@ -8,18 +8,21 @@ import structlog
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
-from cv_service import CVService
-from llm_service import LLMService
-from models import ChatRequest
-from models import ChatResponse
+from src.cv_service import CvService
+from src.llm_service import LLMService
+from src.models import ChatRequest
+from src.models import ChatResponse
+from src.indexing.cv_indexing_service import CvIndexingService
+from src.vectordb.cv_repository import CvRepository
 
 log = structlog.get_logger()
 
 app = FastAPI()
 
-cv_service = CVService()
+repository = CvRepository()
+cv_service = CvService(repository)
+cv_indexing_service = CvIndexingService(repository)
 llm_service = LLMService()
-
 
 app.add_middleware(
     CORSMiddleware,
@@ -78,5 +81,5 @@ async def get_chroma_docs() -> list[dict[str, Any]]:
 @app.post("/admin/reindex", status_code=HTTPStatus.NO_CONTENT)
 async def reindex():
     log.info("admin.reindex.started")
-    cv_service.index_cv()
+    cv_indexing_service.index_cv()
     log.info("admin.reindex.finished")

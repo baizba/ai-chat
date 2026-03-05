@@ -1,4 +1,4 @@
-from cv_parser import CVParser
+from src.indexing.cv_parser import CVParser
 
 def test_simple_content():
     # prepare

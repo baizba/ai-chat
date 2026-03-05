@@ -1,6 +1,6 @@
 import hashlib
 
-from models import CVNode, CVNodeLevel
+from src.models import CVNode, CVNodeLevel
 
 
 def stable_id(value: str) -> str:
