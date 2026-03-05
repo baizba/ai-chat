@@ -14,6 +14,7 @@ from ai_chat.models import ChatRequest
 from ai_chat.models import ChatResponse
 from ai_chat.indexing.cv_indexing_service import CvIndexingService
 from ai_chat.vectordb.cv_repository import CvRepository
+from ai_chat.vectordb.models import CvDataItem
 
 log = structlog.get_logger()
 
@@ -74,7 +75,7 @@ async def chat(request: ChatRequest):
 
 
 @app.get("/admin/docs/raw")
-async def get_chroma_docs() -> list[dict[str, Any]]:
+async def get_chroma_docs() -> list[CvDataItem]:
     return cv_service.get_docs_raw()
 
 
