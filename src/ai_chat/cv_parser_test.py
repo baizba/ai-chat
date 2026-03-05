@@ -1,4 +1,4 @@
-from src.indexing.cv_parser import CVParser
+from ai_chat.indexing.cv_parser import CVParser
 
 def test_simple_content():
     # prepare

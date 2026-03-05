@@ -6,7 +6,7 @@ import structlog
 from chromadb import EmbeddingFunction, Documents, Embeddings
 from sentence_transformers import SentenceTransformer
 
-from src.vectordb.models import RetrievalResult, CvDataItem
+from ai_chat.vectordb.models import RetrievalResult, CvDataItem
 
 # constants
 CV_DATA = "cv_data"

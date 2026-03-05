@@ -8,12 +8,12 @@ import structlog
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
-from src.cv_service import CvService
-from src.llm_service import LLMService
-from src.models import ChatRequest
-from src.models import ChatResponse
-from src.indexing.cv_indexing_service import CvIndexingService
-from src.vectordb.cv_repository import CvRepository
+from ai_chat.cv_service import CvService
+from ai_chat.llm_service import LLMService
+from ai_chat.models import ChatRequest
+from ai_chat.models import ChatResponse
+from ai_chat.indexing.cv_indexing_service import CvIndexingService
+from ai_chat.vectordb.cv_repository import CvRepository
 
 log = structlog.get_logger()
 

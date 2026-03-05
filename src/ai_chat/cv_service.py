@@ -1,8 +1,8 @@
 import structlog
 
-from src.models import VectorSearchResult
-from src.vectordb.cv_repository import CvRepository
-from src.vectordb.models import RetrievalResult
+from ai_chat.models import VectorSearchResult
+from ai_chat.vectordb.cv_repository import CvRepository
+from ai_chat.vectordb.models import RetrievalResult
 
 PRECISION_GAP = 0.15
 N_RESULTS = 3
