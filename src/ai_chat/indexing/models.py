@@ -1,26 +1,4 @@
-from __future__ import annotations  # imported to make it possible to reuse type inside type
-
 from enum import Enum
-
-from pydantic import BaseModel
-
-
-# fastapi request
-class ChatRequest(BaseModel):
-    message: str
-    uiRequestId: str
-    user: str
-
-
-# fastapi response
-class ChatResponse(BaseModel):
-    response: str
-
-
-class VectorSearchResult:
-    def __init__(self, documents: list[str], distances: list[float]):
-        self.documents = documents
-        self.distances = distances
 
 
 # used for nodes (node level)
@@ -53,6 +31,5 @@ class CVNode:
         # reverse to get root -> leaf
         parts.reverse()
 
-        # join into path
-        return "/".join(parts)
-
+        # join into path and leave out the root node as it is always the same
+        return "/".join(parts[1:])

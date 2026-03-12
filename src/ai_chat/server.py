@@ -2,24 +2,27 @@ import time
 import uuid
 from contextlib import contextmanager
 from http import HTTPStatus
-from typing import Any
 
 import structlog
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
-from cv_service import CVService
-from llm_service import LLMService
-from models import ChatRequest
-from models import ChatResponse
+from ai_chat.retrieval.cv_service import CvService
+from ai_chat.indexing.cv_indexing_service import CvIndexingService
+from ai_chat.llm.llm_service import LLMService
+from ai_chat.models import ChatRequest
+from ai_chat.models import ChatResponse
+from ai_chat.vectordb.cv_repository import CvRepository
+from ai_chat.vectordb.models import CvDataItem
 
 log = structlog.get_logger()
 
 app = FastAPI()
 
-cv_service = CVService()
+repository = CvRepository()
+cv_service = CvService(repository)
+cv_indexing_service = CvIndexingService(repository)
 llm_service = LLMService()
-
 
 app.add_middleware(
     CORSMiddleware,
@@ -71,12 +74,12 @@ async def chat(request: ChatRequest):
 
 
 @app.get("/admin/docs/raw")
-async def get_chroma_docs() -> list[dict[str, Any]]:
+async def get_chroma_docs() -> list[CvDataItem]:
     return cv_service.get_docs_raw()
 
 
 @app.post("/admin/reindex", status_code=HTTPStatus.NO_CONTENT)
 async def reindex():
     log.info("admin.reindex.started")
-    cv_service.index_cv()
+    cv_indexing_service.index_cv()
     log.info("admin.reindex.finished")
