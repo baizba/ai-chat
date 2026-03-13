@@ -28,7 +28,7 @@ class MyEmbeddingFunction(EmbeddingFunction):
 class CvRepository:
     def __init__(self):
         # chroma connection
-        self.client = chromadb.HttpClient(host="chroma", port=8000)
+        self.client = chromadb.HttpClient(host="localhost", port=8000)
 
         # embedding model
         model = SentenceTransformer('all-MiniLM-L6-v2')
@@ -70,7 +70,7 @@ class CvRepository:
         metadatas = result_raw["metadatas"][0]
 
         res: List[RetrievalResult] = []
-        for id, distance, document, metadata in zip(ids, distances, documents, metadatas):
-            res.append(RetrievalResult(id=id, distance=distance, document=document, metadata=metadata))
+        for id_, distance, document, metadata in zip(ids, distances, documents, metadatas):
+            res.append(RetrievalResult(id=id_, distance=distance, document=document, metadata=metadata))
 
         return res

@@ -8,3 +8,4 @@ langchain-huggingface
 chromadb
 sentence-transformers
 accelerate
+nltk
