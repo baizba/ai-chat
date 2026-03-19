@@ -2,7 +2,7 @@ import structlog
 
 from ai_chat.retrieval.models import VectorSearchResult
 from ai_chat.vectordb.cv_repository import CvRepository
-from ai_chat.vectordb.models import RetrievalResult, CvDataItem
+from ai_chat.vectordb.models import RetrievalResult, VectorItem
 
 PRECISION_GAP = 0.15
 N_RESULTS = 3
@@ -60,5 +60,5 @@ class CvService:
 
         return VectorSearchResult(documents=filtered_documents, distances=filtered_distances)
 
-    def get_docs_raw(self) -> list[CvDataItem]:
+    def get_docs_raw(self) -> list[VectorItem]:
         return self.cv_repository.get_cv_docs_raw()

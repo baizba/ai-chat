@@ -6,7 +6,7 @@ from sentence_transformers import SentenceTransformer
 
 from ai_chat.intent.models import Domain
 from ai_chat.vectordb.custom_embedding_function import CustomEmbeddingFunction
-from ai_chat.vectordb.models import RetrievalResult
+from ai_chat.vectordb.models import RetrievalResult, VectorItem
 
 log = structlog.get_logger()
 
@@ -142,3 +142,10 @@ class IntentRepository:
             res.append(RetrievalResult(id=id_, distance=distance, document=document, metadata=metadata))
 
         return res
+
+    def get_intents_raw(self):
+        chroma_docs = self.intent_collection.get()
+        results: List[VectorItem] = []
+        for id_, doc, metadata in zip(chroma_docs["ids"], chroma_docs["documents"], chroma_docs["metadatas"]):
+            results.append(VectorItem(id=id_, document=doc, metadata=metadata))
+        return results

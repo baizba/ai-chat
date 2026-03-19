@@ -6,7 +6,7 @@ import structlog
 from sentence_transformers import SentenceTransformer
 
 from ai_chat.vectordb.custom_embedding_function import CustomEmbeddingFunction
-from ai_chat.vectordb.models import RetrievalResult, CvDataItem
+from ai_chat.vectordb.models import RetrievalResult, VectorItem
 
 # constants
 CV_DATA = "cv_data"
@@ -26,11 +26,11 @@ class CvRepository:
         self.embedding_function = CustomEmbeddingFunction(model)
         self.collection = self.client.get_or_create_collection(name=CV_DATA, embedding_function=self.embedding_function)
 
-    def get_cv_docs_raw(self) -> list[CvDataItem]:
+    def get_cv_docs_raw(self) -> list[VectorItem]:
         chroma_docs = self.collection.get()
-        results: List[CvDataItem] = []
+        results: List[VectorItem] = []
         for id_, doc, metadata in zip(chroma_docs["ids"], chroma_docs["documents"], chroma_docs["metadatas"]):
-            results.append(CvDataItem(id=id_, document=doc, metadata=metadata))
+            results.append(VectorItem(id=id_, document=doc, metadata=metadata))
         return results
 
     def delete_cv_data(self):

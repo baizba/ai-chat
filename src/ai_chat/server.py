@@ -14,7 +14,7 @@ from ai_chat.llm.llm_service import LLMService
 from ai_chat.models import ChatRequest
 from ai_chat.models import ChatResponse
 from ai_chat.vectordb.cv_repository import CvRepository
-from ai_chat.vectordb.models import CvDataItem
+from ai_chat.vectordb.models import VectorItem
 
 log = structlog.get_logger()
 
@@ -24,6 +24,7 @@ repository = CvRepository()
 cv_service = CvService(repository)
 cv_indexing_service = CvIndexingService(repository)
 llm_service = LLMService()
+classifier = IntentClassifier()
 
 app.add_middleware(
     CORSMiddleware,
@@ -74,9 +75,14 @@ async def chat(request: ChatRequest):
     return ChatResponse(response=answer)
 
 
-@app.get("/admin/docs/raw")
-async def get_chroma_docs() -> list[CvDataItem]:
+@app.get("/admin/docs/cv/raw")
+async def get_chroma_docs() -> list[VectorItem]:
     return cv_service.get_docs_raw()
+
+
+@app.get("/admin/docs/intent/raw")
+async def get_intent_docs() -> list[VectorItem]:
+    return classifier.get_intents_raw()
 
 
 @app.post("/admin/cv/reindex", status_code=HTTPStatus.NO_CONTENT)
@@ -85,8 +91,9 @@ async def reindex_cv():
     cv_indexing_service.index_cv()
     log.info("admin.reindex.cv.finished")
 
+
 @app.post("/admin/intents/reindex", status_code=HTTPStatus.NO_CONTENT)
 async def reindex_intent():
     log.info("admin.reindex.intents.started")
-    IntentClassifier().index_intents()
+    classifier.index_intents()
     log.info("admin.reindex.intents.finished")

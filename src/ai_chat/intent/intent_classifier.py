@@ -25,3 +25,6 @@ class IntentClassifier:
     def index_intents(self):
         self.intent_repository.delete_intent_data()
         self.intent_repository.initialize_intents()
+
+    def get_intents_raw(self):
+        return self.intent_repository.get_intents_raw()
