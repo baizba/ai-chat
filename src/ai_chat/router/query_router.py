@@ -1,29 +1,41 @@
 from typing import Callable
 
+import structlog
+
 from ai_chat.intent.intent_classifier import IntentClassifier
-from ai_chat.intent.models import Domain, QueryType
+from ai_chat.intent.models import Domain
 from ai_chat.service.employment_service import EmploymentService
 from ai_chat.service.skills_service import SkillsService
+from ai_chat.vectordb.cv_repository import CvRepository
+
+log = structlog.get_logger()
 
 
 class QueryRouter:
-    def __init__(self):
+    def __init__(self, repository: CvRepository) -> None:
         self.intent_classifier = IntentClassifier()
-        self.employment_service = EmploymentService()
+        self.employment_service = EmploymentService(repository)
         self.skills_service = SkillsService()
 
-        self.routes: dict[tuple[Domain, QueryType], Callable] = {
-            (Domain.EMPLOYMENT, QueryType.FACT): self.employment_service.handle_fact,
-            (Domain.EMPLOYMENT, QueryType.LIST): self.employment_service.handle_list,
-            (Domain.SKILLS, QueryType.LIST): self.skills_service.handle_list
+        self.routes: dict[Domain, Callable] = {
+            Domain.EMPLOYMENT: self.employment_service.handle,
+            Domain.SKILLS: self.skills_service.handle
         }
 
     def route_query(self, question: str) -> str:
-        domain, query_type = self.intent_classifier.get_domain_and_query_type(question)
-        if domain is None or query_type is None:
+        question = question.lower().replace("branislav", "he").replace("vidovic", "")
+        domain = self.intent_classifier.get_domain_and_query_type(question)
+        if domain is None:
             return question + " -> not clear what this question is about"
 
-        # here goes the logic with services
-        self.routes.get((domain, query_type))
+        handler = self.routes.get(domain)
+        log.info(
+            "intent.routing",
+            question=question,
+            domain=domain,
+            handler=handler
+        )
+        if handler is None:
+            return "This platform answers only questions about CV of Branislav"
 
-        return "This platform answers only questions about VC of Branislav"
+        return handler(question)

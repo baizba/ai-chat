@@ -47,7 +47,7 @@ class CvService:
         ids = [r.id for r in results]
         distances = [r.distance for r in results]
         log.info(
-            "rag.retrieval",
+            "cv.retrieval",
             request_id=request_id,
             query=query,
             top_k=N_RESULTS,

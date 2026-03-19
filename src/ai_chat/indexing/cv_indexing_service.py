@@ -12,21 +12,26 @@ def to_chroma_documents(root_node: CVNode) -> list:
     while len(nodes_to_process) > 0:
         current_node = nodes_to_process.popleft()
         if len(current_node.text.strip()) > 0:
-            doc_content = ""
             metadata = {
-                "path": current_node.get_path(),
-                "doc_type": "cv"
+                "path": current_node.get_path()
             }
 
             current_node_title_clean = current_node.title.lstrip("#").strip()
             if current_node.level == CVNodeLevel.SECTION:  # this means section (middle node)
-                doc_content = "Section: " + current_node_title_clean
-                metadata["section"] = current_node_title_clean
+                section = current_node_title_clean
+                doc_content = "Section: " + section
+                metadata["section"] = section
             elif current_node.level == CVNodeLevel.SUBSECTION:  # this means subsection (3rd level node)
-                parent_title_clean = current_node.parent.title.lstrip("#").strip()
-                doc_content = "Section: " + parent_title_clean + "\n" + "Subsection: " + current_node_title_clean
-                metadata["section"] = parent_title_clean
-                metadata["subsection"] = current_node_title_clean
+                section = current_node.parent.title.lstrip("#").strip()
+                sub_section = current_node_title_clean
+                doc_content = "Section: " + section + "\n" + "Subsection: " + sub_section
+                metadata["section"] = section
+                if section.lower() == "experience":
+                    metadata["entityType"] = "employment"
+                    metadata["company"] = sub_section
+                elif section.lower() == "technical skills":
+                    metadata["entityType"] = "skills"
+                    metadata["category"] = sub_section
             else:
                 raise RuntimeError(f"should not be here. Node {current_node.id} is invalid")
 

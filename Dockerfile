@@ -12,10 +12,6 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Download NLTK data during build
-ENV NLTK_DATA=/data/nltk_data
-RUN mkdir -p $NLTK_DATA && python -m nltk.downloader -d $NLTK_DATA wordnet omw-1.4
-
 COPY src ./src
 COPY cv ./cv
 

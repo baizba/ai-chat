@@ -3,26 +3,15 @@ from typing import List, Dict
 
 import chromadb
 import structlog
-from chromadb import EmbeddingFunction, Documents, Embeddings
 from sentence_transformers import SentenceTransformer
 
+from ai_chat.vectordb.custom_embedding_function import CustomEmbeddingFunction
 from ai_chat.vectordb.models import RetrievalResult, CvDataItem
 
 # constants
 CV_DATA = "cv_data"
 
 log = structlog.get_logger()
-
-
-# wrapper matching new Chroma interface
-class MyEmbeddingFunction(EmbeddingFunction):
-    def __init__(self, model: SentenceTransformer):
-        super().__init__()
-        self.model = model
-
-    def __call__(self, docs: Documents) -> Embeddings:
-        # embed the documents somehow
-        return self.model.encode(docs).tolist()
 
 
 class CvRepository:
@@ -34,7 +23,7 @@ class CvRepository:
         model = SentenceTransformer('all-MiniLM-L6-v2')
 
         # chroma collection
-        self.embedding_function = MyEmbeddingFunction(model)
+        self.embedding_function = CustomEmbeddingFunction(model)
         self.collection = self.client.get_or_create_collection(name=CV_DATA, embedding_function=self.embedding_function)
 
     def get_cv_docs_raw(self) -> list[CvDataItem]:
@@ -72,5 +61,18 @@ class CvRepository:
         res: List[RetrievalResult] = []
         for id_, distance, document, metadata in zip(ids, distances, documents, metadatas):
             res.append(RetrievalResult(id=id_, distance=distance, document=document, metadata=metadata))
+
+        return res
+
+    def metadata_query(self, metadata_: dict) -> list[RetrievalResult]:
+        result_raw = self.collection.get(where=metadata_)
+
+        ids = result_raw["ids"]
+        documents = result_raw["documents"]
+        metadatas = result_raw["metadatas"]
+
+        res: List[RetrievalResult] = []
+        for id_, document, metadata in zip(ids, documents, metadatas):
+            res.append(RetrievalResult(id=id_, distance=0, document=document, metadata=metadata))
 
         return res

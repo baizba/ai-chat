@@ -7,6 +7,7 @@ import structlog
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
+from ai_chat.intent.intent_classifier import IntentClassifier
 from ai_chat.retrieval.cv_service import CvService
 from ai_chat.indexing.cv_indexing_service import CvIndexingService
 from ai_chat.llm.llm_service import LLMService
@@ -78,8 +79,14 @@ async def get_chroma_docs() -> list[CvDataItem]:
     return cv_service.get_docs_raw()
 
 
-@app.post("/admin/reindex", status_code=HTTPStatus.NO_CONTENT)
-async def reindex():
-    log.info("admin.reindex.started")
+@app.post("/admin/cv/reindex", status_code=HTTPStatus.NO_CONTENT)
+async def reindex_cv():
+    log.info("admin.reindex.cv.started")
     cv_indexing_service.index_cv()
-    log.info("admin.reindex.finished")
+    log.info("admin.reindex.cv.finished")
+
+@app.post("/admin/intents/reindex", status_code=HTTPStatus.NO_CONTENT)
+async def reindex_intent():
+    log.info("admin.reindex.intents.started")
+    IntentClassifier().index_intents()
+    log.info("admin.reindex.intents.finished")

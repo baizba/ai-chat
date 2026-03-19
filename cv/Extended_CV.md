@@ -79,10 +79,13 @@ Served as Senior Developer in the beginning and moved to Architect-Role. Develop
 - Intro to Self-Driving Cars (2020), Introduction to Data Science (2020)
 - A Basic Training in Communication (2012)
 
-## Technical Skills (Technical knowledge)
+## Technical Skills
 
-### Languages & Frameworks 
-Java, Spring, JavaScript, TypeScript, Groovy, Python 
+### Languages
+Java, JavaScript, TypeScript, Groovy, Python, Kotlin
+
+### Frameworks
+Spring, JUnit, Mockito, Angular, osmdroid
 
 ### Tools & Platforms
 Camunda 7 & 8 (Modeler, Operate, Tasklist), Maven, Docker, Kubernetes, GitHub, CI/CD (Jenkins), AWS. OpenAPI, Azure, REST/SOAP, Kafka
