@@ -13,12 +13,12 @@ def add_employment_range(metadata: dict[str, str], employment_section: str):
         # capture from and to separately
         pattern = re.compile(r"([A-Za-z]+\s+\d{4})\s*[-–—]\s*([A-Za-z]+\s+\d{4})")
         from_, to_ = pattern.findall(employment_period[0])[0]
-        metadata["from_year"] = from_.split(" ")[1]
-        metadata["to_year"] = to_.split(" ")[1]
+        metadata["fromYear"] = from_.split(" ")[1]
+        metadata["toYear"] = to_.split(" ")[1]
     else:
         pattern = re.compile(r"\bperiod of employment\b\W+since\s([A-Za-z]+\s+\d{4})", re.IGNORECASE)
         employment_period = pattern.findall(employment_section)[0]
-        metadata["from_year"] = employment_period.split(" ")[1]
+        metadata["fromYear"] = employment_period.split(" ")[1]
 
 
 def to_chroma_documents(root_node: CVNode) -> list:
