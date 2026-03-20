@@ -24,7 +24,8 @@ class QueryRouter:
 
     def route_query(self, question: str) -> str:
         question = question.lower().replace("branislav", "he").replace("vidovic", "")
-        domain = self.intent_classifier.get_domain_and_query_type(question)
+        domains = self.intent_classifier.get_domain_and_query_type(question)
+        domain = domains[0] #decide on strategy
         if domain is None:
             return question + " -> not clear what this question is about"
 

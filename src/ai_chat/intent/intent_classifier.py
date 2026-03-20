@@ -10,7 +10,7 @@ class IntentClassifier:
     def __init__(self):
         self.intent_repository = IntentRepository()
 
-    def get_domain_and_query_type(self, question: str) -> Domain:
+    def get_domain_and_query_type(self, question: str) -> list[Domain]:
         intents = self.intent_repository.query_intent(question, 3)
         log.info(
             "intent.retrieval",
@@ -19,8 +19,7 @@ class IntentClassifier:
             document=[t.document for t in intents],
             distance=[t.distance for t in intents]
         )
-        md = intents[0].metadata
-        return Domain(md["domain"])
+        return [Domain(intent.metadata["domain"]) for intent in intents]
 
     def index_intents(self):
         self.intent_repository.delete_intent_data()
