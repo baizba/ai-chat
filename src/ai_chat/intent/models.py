@@ -5,7 +5,8 @@ class Domain(Enum):
     EMPLOYMENT = "employment"
     SKILLS = "skills"
     PROFILE = "profile"
-    PROJECTS = "projects"
+    EDUCATION = "education"
+    CERTIFICATES = "certificates"
 
 
 class QueryType(Enum):

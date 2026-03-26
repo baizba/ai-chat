@@ -10,7 +10,7 @@ class IntentClassifier:
     def __init__(self):
         self.intent_repository = IntentRepository()
 
-    def get_domain_and_query_type(self, question: str) -> list[Domain]:
+    def get_domain(self, question: str) -> list[Domain]:
         intents = self.intent_repository.query_intent(question, 3)
         log.info(
             "intent.retrieval",

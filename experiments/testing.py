@@ -14,13 +14,6 @@ def test_employment_service():
     experience_list = employment_service.handle("List all companies where he worked.")
     print(experience_list)
 
-
-def test_query_router():
-    query_router = QueryRouter(CvRepository())
-    result = query_router.route_query("Give me a list of companies where he worked.")
-    print(result)
-
-
 def test_index_intent():
     IntentClassifier().index_intents()
 
@@ -34,11 +27,16 @@ def test_profile_service():
     answer = profile_service.handle("Tell me something about Johny Bravo")
     print(answer)
 
+def test_query_router():
+    query_router = QueryRouter(CvRepository(), LLMService())
+    result = query_router.route_query("Give me all his certifications.")
+    print(result)
+
 
 # test_index_intent()
-# test_query_router()
 # test_skills_service()
-test_profile_service()
+# test_profile_service()
+test_query_router()
 
 # pattern = re.compile(r"\bperiod of employment\b\W+([A-Za-z]+\s+\d{4}\s*[-–—]\s*[A-Za-z]+\s+\d{4})", re.IGNORECASE)
 # res = pattern.findall("**Period of employment:** March 2017 – September 2020")
