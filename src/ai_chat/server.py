@@ -44,6 +44,7 @@ def measure_time():
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     request_id = str(uuid.uuid4())
+    question = request.message
 
     request_log = log.bind(
         request_id=request_id,
@@ -53,18 +54,18 @@ async def chat(request: ChatRequest):
 
     request_log.info(
         "chat.request",
-        message=request.message,
-        message_length=len(request.message)
+        message=question,
+        message_length=len(question)
     )
 
     with measure_time() as elapsed_time:
-        response = cv_service.query(request.message, request_id)
+        response = cv_service.query(question, request_id)
 
         context = ""
         for doc in response.documents:
             context += doc + "\n"
 
-        answer = llm_service.answer(request.message, context)
+        answer = llm_service.answer_general(question, context)
 
     request_log.info(
         "chat.response",

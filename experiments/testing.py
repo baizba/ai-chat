@@ -4,6 +4,7 @@ from ai_chat.intent.intent_classifier import IntentClassifier
 from ai_chat.llm.llm_service import LLMService
 from ai_chat.router.query_router import QueryRouter
 from ai_chat.service.employment_service import EmploymentService
+from ai_chat.service.profile_service import ProfileService
 from ai_chat.service.skills_service import SkillsService
 from ai_chat.vectordb.cv_repository import CvRepository
 
@@ -28,10 +29,16 @@ def test_skills_service():
     answer = skills_service.handle("Did he ever use test driven design (TDD)?")
     print(answer)
 
+def test_profile_service():
+    profile_service = ProfileService(CvRepository(), LLMService())
+    answer = profile_service.handle("Tell me something about Johny Bravo")
+    print(answer)
+
 
 # test_index_intent()
 # test_query_router()
-test_skills_service()
+# test_skills_service()
+test_profile_service()
 
 # pattern = re.compile(r"\bperiod of employment\b\W+([A-Za-z]+\s+\d{4}\s*[-–—]\s*[A-Za-z]+\s+\d{4})", re.IGNORECASE)
 # res = pattern.findall("**Period of employment:** March 2017 – September 2020")

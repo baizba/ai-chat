@@ -38,6 +38,7 @@ def to_chroma_documents(root_node: CVNode) -> list:
                 section = current_node_title_clean
                 doc_content = "Section: " + section
                 metadata["section"] = section
+                metadata["entityType"] = section.lower()
             elif current_node.level == CVNodeLevel.SUBSECTION:  # this means subsection (3rd level node)
                 section = current_node.parent.title.lstrip("#").strip()
                 sub_section = current_node_title_clean

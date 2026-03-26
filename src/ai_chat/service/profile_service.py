@@ -7,21 +7,20 @@ from ai_chat.vectordb.cv_repository import CvRepository
 log = structlog.get_logger()
 
 
-class SkillsService:
+class ProfileService:
     def __init__(self, repository: CvRepository, llm_service: LLMService):
         self.repository = repository
         self.llm_service = llm_service
 
     def handle(self, question: str) -> str:
-        skills_metadata = {"entityType": "skills"}
-        result = self.repository.metadata_query(skills_metadata)
+        skills_profile = {"entityType": "profile"}
+        result = self.repository.metadata_query(skills_profile)
         log.info(
-            "cv.retrieval.metadata.skills",
-            query=skills_metadata,
+            "cv.retrieval.metadata.profile",
+            query=skills_profile,
             doc_ids=[r.id for r in result],
             path=[r.metadata["path"] for r in result],
-            category=[r.metadata["category"] for r in result]
         )
 
         context = "\n".join([r.document for r in result])
-        return self.llm_service.answer(prompts.skills_prompt, question, context)
+        return self.llm_service.answer(prompts.profile_prompt, question, context)

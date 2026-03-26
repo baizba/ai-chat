@@ -4,6 +4,8 @@ from contextlib import contextmanager
 import structlog
 from transformers import pipeline
 
+from ai_chat.service import prompts
+
 
 @contextmanager
 def measure_time():
@@ -11,20 +13,17 @@ def measure_time():
     yield lambda: (time.perf_counter() - start) * 1000
 
 
+def get_final_prompt(prompt_template: str, context: str, question: str) -> str:
+    return prompt_template.replace("${context}", context).replace("${question}", question)
+
+
 class LLMService:
     def __init__(self):
         self.generator_pipeline = pipeline("text-generation", "microsoft/Phi-3-mini-4k-instruct", device_map="auto", dtype="auto")
         self.log = structlog.getLogger()
 
-    def answer(self, question: str, context: str) -> str:
-        final_prompt = f"""<|system|>
-You are a helpful assistant. Answer only using the provided context.
-This context is from the CV and describes professional experience of Branislav Vidovic.
-If you can not find the answer then politely reply that you did not find the information that was asked.<|end|>
-<|user|>
-Context: {context}
-Question: {question}<|end|>
-<|assistant|>"""
+    def answer_general(self, question: str, context: str) -> str:
+        final_prompt = get_final_prompt(prompts.general_prompt, context, question)
 
         with measure_time() as elapsed_time:
             response = self.generator_pipeline(final_prompt)
@@ -47,30 +46,8 @@ Question: {question}<|end|>
 
         return final_response
 
-    def answer_skills(self, question: str, context: str) -> str:
-        final_prompt = f"""<|system|>
-You are a precise assistant.
-Rules:
-Answer ONLY using the provided context.
-Do NOT mention "context" or explain your reasoning.
-Be concise and natural.
-For yes/no questions, answer with "Yes" or "No" followed by a short sentence.
-For list questions, return only the list.
-If the question can be answered partially mention exactly what information you can answer and what information is not known.
-Examples:
-Question: Has he used Maven?
-Answer: Yes, he has worked with Maven.
-Question: Did he work with Python and Maven?
-Answer: Yes, he has experience with both Python and Maven.
-Question: List his skills
-Answer: Java, Spring Boot, Hibernate, Maven
-<|end|>
-<|user|>
-Context: {context}
-Question: {question}
-<|end|>
-<|assistant|>
-"""
+    def answer(self, prompt_template: str, question: str, context: str) -> str:
+        final_prompt = get_final_prompt(prompt_template, context, question)
 
         with measure_time() as elapsed_time:
             response = self.generator_pipeline(final_prompt)
