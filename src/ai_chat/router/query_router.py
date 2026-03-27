@@ -17,7 +17,7 @@ log = structlog.get_logger()
 class QueryRouter:
     def __init__(self, repository: CvRepository, llm_service: LLMService) -> None:
         self.intent_classifier = IntentClassifier()
-        self.employment_service = EmploymentService(repository)
+        self.employment_service = EmploymentService(repository, llm_service)
         self.skills_service = SkillsService(repository, llm_service)
         self.profile_service = ProfileService(repository, llm_service)
         self.certificate_service = CertificateService(repository, llm_service)

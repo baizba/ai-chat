@@ -2,6 +2,8 @@ import re
 
 import structlog
 
+from ai_chat.llm.llm_service import LLMService
+from ai_chat.service import prompts
 from ai_chat.vectordb.cv_repository import CvRepository
 from ai_chat.vectordb.models import RetrievalResult
 
@@ -16,9 +18,17 @@ def extract_employment_period(metadata: dict) -> tuple[int, int]:
     return year_from_int, year_to_int
 
 
+def build_employment_context(employment: RetrievalResult) -> str:
+    company = employment.metadata["company"]
+    aliases = employment.metadata["aliases"]
+    role = employment.document
+    return f"Company: {company} (Aliases: {aliases}) {role}"
+
+
 class EmploymentService:
-    def __init__(self, repository: CvRepository):
+    def __init__(self, repository: CvRepository, llm_service: LLMService) -> None:
         self.repository = repository
+        self.llm_service = llm_service
 
     def handle(self, question: str) -> str:
         pattern = re.compile(r"\b(?:19|20)\d{2}\b")
@@ -79,24 +89,33 @@ class EmploymentService:
         question_normalized = question.lower()
         question_tokens = re.split(r"\W+", question_normalized)
 
-        matched_companies = []
-        seen = set() # used only to avoid possible duplicates in companies
+        matched_employments: list[RetrievalResult] = []
+        seen = set()  # used only to avoid possible duplicates in companies
 
         # check if user asked for company by full name or by alias
         for r in result:
             company_normalized = r.metadata["company"].lower()
             if company_normalized in question_normalized and company_normalized not in seen:
-                matched_companies.append(r)
+                matched_employments.append(r)
                 seen.add(company_normalized)
-                continue # if we matched company by the name then just move to the next company
+                continue  # if we matched company by the name then just move to the next company
             for alias in r.metadata["aliases"].split(","):
                 if alias in question_tokens and company_normalized not in seen:
-                    matched_companies.append(r)
-                    break # avoid matching one company multiple times
+                    matched_employments.append(r)
+                    seen.add(company_normalized)
+                    break  # avoid matching one company multiple times
 
-        if len(matched_companies) > 0:
+        log.info("employment.list_employments", companies=[e.metadata["company"] for e in matched_employments])
+
+        if len(matched_employments) > 0:
             # here goes real llm call
-            return f"Explain this LLM: {matched_companies}"
+            answers = []
+            for employment in matched_employments:
+                context = build_employment_context(employment)
+                question_single_employment = f"What di he do in {employment.metadata['company']}?"
+                answer = self.llm_service.answer(prompts.company_role_prompt, question_single_employment, context)
+                answers.append(answer)
+            return "\n".join(answers)
 
         # default return only the list of employments
         return self.list_employments()
