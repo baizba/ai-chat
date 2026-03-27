@@ -29,7 +29,7 @@ def test_profile_service():
 
 def test_query_router():
     query_router = QueryRouter(CvRepository(), LLMService())
-    result = query_router.route_query("Give me all his certifications.")
+    result = query_router.route_query("Where did he work in 2008?")
     print(result)
 
 

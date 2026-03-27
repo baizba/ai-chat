@@ -59,15 +59,15 @@ class EmploymentService:
         result = self.query_employment()
 
         employment_set = set()
-        for id_, doc, meta in result:
-            year_from_int, year_to_int = extract_employment_period(meta)
+        for r in result:
+            year_from_int, year_to_int = extract_employment_period(r.metadata)
 
             # something is wrong in this case (employment without valid start)
             if year_from_int is None:
                 continue
 
             if year_from_int <= year <= year_to_int:
-                employment_set.add(meta["company"])
+                employment_set.add(r.metadata["company"])
 
         if len(employment_set) > 0:
             return f"Branislav worked in: {', '.join(employment_set)}"
@@ -76,16 +76,16 @@ class EmploymentService:
 
     def get_experience_list(self) -> str:
         result = self.query_employment()
-        exp_list = [r.metadata["company"] for r in result]
-        return f"Branislav worked in: {', '.join(exp_list)}"
+        companies = [r.metadata["company"] for r in result]
+        return f"Branislav worked in: {', '.join(companies)}"
 
     def query_employment(self) -> list[RetrievalResult]:
         metadata_employment = {"entityType": "employment"}
-        result = self.repository.metadata_query(metadata_employment)
+        employment = self.repository.metadata_query(metadata_employment)
         log.info(
             "cv.retrieval.metadata.employment",
             query=metadata_employment,
-            doc_ids=[r.id for r in result],
-            path=[r.metadata["path"] for r in result]
+            doc_ids=[r.id for r in employment],
+            path=[r.metadata["path"] for r in employment]
         )
-        return result
+        return employment
