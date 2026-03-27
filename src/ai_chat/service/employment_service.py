@@ -39,8 +39,8 @@ class EmploymentService:
         result = self.query_employment()
 
         employment_set = set()
-        for id_, doc, meta in result:
-            year_from_int, year_to_int = extract_employment_period(meta)
+        for r in result:
+            year_from_int, year_to_int = extract_employment_period(r.metadata)
 
             # something is wrong in this case (employment without valid start)
             if year_from_int is None:
@@ -48,7 +48,7 @@ class EmploymentService:
 
             # in this case we have complete employment range
             if year_from_int <= end_year and year_to_int >= start_year:
-                employment_set.add(meta["company"])
+                employment_set.add(r.metadata["company"])
 
         if len(employment_set) > 0:
             return f"Branislav worked in: {', '.join(employment_set)}"

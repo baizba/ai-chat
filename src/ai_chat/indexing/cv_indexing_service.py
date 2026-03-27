@@ -36,13 +36,11 @@ def to_chroma_documents(root_node: CVNode) -> list:
             }
             if current_node.level == CVNodeLevel.SECTION:  # this means section (middle node)
                 section = current_node_title_clean
-                doc_content = "Section: " + section
                 metadata["section"] = section
                 metadata["entityType"] = section.lower()
             elif current_node.level == CVNodeLevel.SUBSECTION:  # this means subsection (3rd level node)
                 section = current_node.parent.title.lstrip("#").strip()
                 sub_section = current_node_title_clean
-                doc_content = "Section: " + section + "\n" + "Subsection: " + sub_section
                 metadata["section"] = section
                 if section.lower() == "experience":
                     metadata["entityType"] = "employment"
@@ -54,7 +52,7 @@ def to_chroma_documents(root_node: CVNode) -> list:
             else:
                 raise RuntimeError(f"should not be here. Node {current_node.id} is invalid")
 
-            doc_content += "\n\n" + current_node_text  # content of the document itself
+            doc_content = current_node_text  # content of the document itself
 
             chroma_doc = {
                 "id": current_node.id,
