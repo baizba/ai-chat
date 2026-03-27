@@ -35,6 +35,8 @@ intents: list[tuple[str, Domain]] = [
     ("Explain his career path.", Domain.EMPLOYMENT),
     ("Give a short summary of his work experience.", Domain.EMPLOYMENT),
     ("How has his career developed over the years?", Domain.EMPLOYMENT),
+    ("What did he do in Netconomy", Domain.EMPLOYMENT),
+    ("What was his role in IBM?", Domain.EMPLOYMENT),
 
     # SKILLS
     ("Does he know Java?", Domain.SKILLS),

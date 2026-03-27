@@ -29,13 +29,13 @@ class EmploymentService:
         log.info("employment.range", years=years_int)
 
         if len(years_int) == 2:
-            return self.get_experience_by_year_range(years_int[0], years_int[1])
+            return self.get_employment_by_year_range(years_int[0], years_int[1])
         elif len(years_int) == 1:
-            return self.get_experience_by_single_year(years_int[0])
+            return self.get_employment_by_single_year(years_int[0])
         else:
-            return self.get_experience_list()
+            return self.get_employment_by_company_or_list(question)
 
-    def get_experience_by_year_range(self, start_year: int, end_year: int) -> str:
+    def get_employment_by_year_range(self, start_year: int, end_year: int) -> str:
         result = self.query_employment()
 
         employment_set = set()
@@ -55,7 +55,7 @@ class EmploymentService:
 
         return f"No employment found for period from {start_year} to {end_year}"
 
-    def get_experience_by_single_year(self, year: int) -> str:
+    def get_employment_by_single_year(self, year: int) -> str:
         result = self.query_employment()
 
         employment_set = set()
@@ -74,7 +74,34 @@ class EmploymentService:
 
         return f"No employment found for year {year}"
 
-    def get_experience_list(self) -> str:
+    def get_employment_by_company_or_list(self, question: str) -> str:
+        result = self.query_employment()
+        question_normalized = question.lower()
+        question_tokens = re.split(r"\W+", question_normalized)
+
+        matched_companies = []
+        seen = set() # used only to avoid possible duplicates in companies
+
+        # check if user asked for company by full name or by alias
+        for r in result:
+            company_normalized = r.metadata["company"].lower()
+            if company_normalized in question_normalized and company_normalized not in seen:
+                matched_companies.append(r)
+                seen.add(company_normalized)
+                continue # if we matched company by the name then just move to the next company
+            for alias in r.metadata["aliases"].split(","):
+                if alias in question_tokens and company_normalized not in seen:
+                    matched_companies.append(r)
+                    break # avoid matching one company multiple times
+
+        if len(matched_companies) > 0:
+            # here goes real llm call
+            return f"Explain this LLM: {matched_companies}"
+
+        # default return only the list of employments
+        return self.list_employments()
+
+    def list_employments(self) -> str:
         result = self.query_employment()
         companies = [r.metadata["company"] for r in result]
         return f"Branislav worked in: {', '.join(companies)}"
