@@ -5,6 +5,8 @@ from ai_chat.indexing.cv_parser import CVParser
 from ai_chat.indexing.models import CVNode, CVNodeLevel
 from ai_chat.vectordb.cv_repository import CvRepository
 
+STOP_WORDS = ["company", "gmbh", "doo", "dienstleistungs"]
+
 
 def add_employment_range(metadata: dict[str, str], employment_section: str):
     pattern = re.compile(r"\bperiod of employment\b\W+([A-Za-z]+\s+\d{4}\s*[-–—]\s*[A-Za-z]+\s+\d{4})", re.IGNORECASE)
@@ -20,6 +22,16 @@ def add_employment_range(metadata: dict[str, str], employment_section: str):
         employment_period = pattern.findall(employment_section)[0]
         metadata["fromYear"] = employment_period.split(" ")[1]
 
+def add_aliases(metadata: dict[str, str], company: str):
+    company_normalized = company.lower()
+    for stop_word in STOP_WORDS:
+        company_normalized = company_normalized.replace(stop_word, "")
+
+    words = re.compile(r"\w+").findall(company_normalized)
+    domains = re.compile(r"\w+\.\w+").findall(company_normalized)
+
+    aliases = set(words + domains)
+    metadata["aliases"] = ",".join(aliases)
 
 def to_chroma_documents(root_node: CVNode) -> list:
     chroma_docs = []
@@ -40,15 +52,15 @@ def to_chroma_documents(root_node: CVNode) -> list:
                 metadata["entityType"] = section.lower()
             elif current_node.level == CVNodeLevel.SUBSECTION:  # this means subsection (3rd level node)
                 section = current_node.parent.title.lstrip("#").strip()
-                sub_section = current_node_title_clean
                 metadata["section"] = section
                 if section.lower() == "experience":
                     metadata["entityType"] = "employment"
-                    metadata["company"] = sub_section
+                    metadata["company"] = current_node_title_clean
                     add_employment_range(metadata, current_node_text)
+                    add_aliases(metadata, current_node_title_clean)
                 elif section.lower() == "technical skills":
                     metadata["entityType"] = "skills"
-                    metadata["category"] = sub_section
+                    metadata["category"] = current_node_title_clean
             else:
                 raise RuntimeError(f"should not be here. Node {current_node.id} is invalid")
 
