@@ -32,18 +32,34 @@ class QueryRouter:
 
     def route_query(self, question: str) -> str:
         question = question.lower().replace("branislav", "he").replace("vidovic", "")
-        domains = self.intent_classifier.get_domain(question)
-        domain = domains[0] #decide on strategy
+        intents = self.intent_classifier.get_intents(question)
+
+        if intents is None or len(intents) < 2:
+            return question + " -> not clear what this question is about"
+
+        distance_threshold = 0.7
+        absolute_dist_threshold = 0.05
+        best_match = intents[0].distance
+        second_best_match = intents[1].distance
+        best_domain = intents[0].metadata["domain"]
+        second_best_domain = intents[1].metadata["domain"]
+
+        # simply check if the similarity is weak to avoid false domains
+        if best_match > distance_threshold:
+            log.error("intent.resolve.lowconfidence", best_match=best_match, distance_threshold=distance_threshold)
+            return question + f" -> not clear what this question is about. Is it about {best_domain} or {second_best_domain}?"
+
+        # if we resolve two different intents but really close then confidence is low
+        if best_domain != second_best_domain and second_best_match - best_match < absolute_dist_threshold:
+            log.error("intent.resolve.ambigous", best_match=best_match, second_best_match=second_best_match, absolute_dist_threshold=absolute_dist_threshold)
+            return question + f" -> not clear what this question is about. Is it about {best_domain} or {second_best_domain}?"
+
+        domain = Domain(best_domain)  # decide on strategy
         if domain is None:
             return question + " -> not clear what this question is about"
 
         handler = self.handlers.get(domain)
-        log.info(
-            "intent.routing",
-            question=question,
-            domain=domain,
-            handler=handler
-        )
+        log.info("intent.routing", question=question, domain=domain, handler=handler)
         if handler is None:
             return "This platform answers only questions about CV of Branislav"
 

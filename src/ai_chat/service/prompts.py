@@ -15,7 +15,8 @@ Do NOT mention "context" or explain your reasoning.
 Be concise and natural.
 For yes/no questions, answer with "Yes" or "No" followed by a short sentence.
 For list questions, return only the list.
-If the question can be answered partially mention exactly what information you can answer and what information is not known.
+If the question can be answered partially, mention exactly what information you can answer and what information is not known.
+If you can not find the information in the context about the question, respond that you dont have the information.
 Examples:
 Question: Has he used Maven?
 Answer: Yes, he has worked with Maven.

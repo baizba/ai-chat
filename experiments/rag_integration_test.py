@@ -4,6 +4,8 @@ from ai_chat.llm.llm_service import LLMService
 from ai_chat.router.query_router import QueryRouter
 
 
+ALL_COMPANIES = ["JIT-Dienstleistungs", "ecx.io", "Netconomy", "Codecentric"]
+
 class RagIntegrationTest(unittest.TestCase):
 
     @classmethod
@@ -57,6 +59,19 @@ class RagIntegrationTest(unittest.TestCase):
 
         result = self.query_router.route_query("List his employments before 2006?")
         self.assertIn("No employment found for year 2006", result)
+
+    def test_employment_questions(self):
+        #answer = self.query_router.route_query("What did he do in netconomy?")
+        #self.assertIn("Java Developer", answer)
+        #self.assertIn("SAP-CX (Hybris)", answer)
+
+        #answer = self.query_router.route_query("What were his duties in ibm?")
+        #self.assertIn("Senior Java Developer", answer)
+        #self.assertIn("SAP-CX (Hybris)", answer)
+
+        answer = self.query_router.route_query("Did he work in Google?")
+        self.assertTrue("no" in answer and "not clear" not in answer)
+        self.assertFalse(any([cmp in answer for cmp in ALL_COMPANIES]), f"answer was {answer}")
 
 
 if __name__ == '__main__':
