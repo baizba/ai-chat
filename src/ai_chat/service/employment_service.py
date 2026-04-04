@@ -127,7 +127,7 @@ class EmploymentService:
             answers = []
             for employment in matched_employments:
                 context = build_employment_context(employment)
-                question_single_employment = f"What di he do in {employment.metadata['company']}?"
+                question_single_employment = f"What did he do in {employment.metadata['company']}?"
                 answer = self.llm_service.answer(prompts.company_role_prompt, question_single_employment, context)
                 answers.append(answer)
             return "\n".join(answers)
@@ -137,7 +137,7 @@ class EmploymentService:
 
     def list_employments(self) -> str:
         result = self.query_employment()
-        companies = [r.metadata["company"] for r in result]
+        companies: list = [r.metadata["company"] for r in result]
         log.info("employment.list_employments", companies=companies)
         return f"Branislav worked in: {', '.join(companies)}"
 
