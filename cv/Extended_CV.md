@@ -40,7 +40,7 @@ Served as Developer and Architect. Duty was to help the customer implement the r
 **Skills:** Process Automation, BPMN, Consulting, Architecture, DevOps, Camunda 7, Camunda 8, Presales, Message Driven architecture, API Design, Development, SCRUM, Agile
 
 ### ecx.io - IBM Company
-**Role:** Senior Java Developer focused on Hybris (SAP CX)
+**Role:** Senior Java Developer focused on Hybris - SAP CX
 **Period of employment:** March 2017 – September 2020
 **Projects:**
 1. [Schluter Systems](https://www.schlueter-systems.com/)
@@ -53,7 +53,7 @@ Served as Senior Developer in the beginning and moved to Architect-Role. Develop
 **Skills:** SAP-CX (Hybris), Consulting, Architecture, Team-Lead, Development, SCRUM, Agile
 
 ### Netconomy GmbH
-**Role:** Java Developer focused on Hybris (SAP CX)
+**Role:** Java Developer focused on Hybris - SAP CX
 **Period of employment:** May 2014 – September 2016
 **Projects:**
 1. Developed multiple E-Commerce shops for customers in Switzerland. My role was developer and included developing and mainting a code base which served as a base platform for multiple webshops. 

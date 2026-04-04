@@ -61,13 +61,13 @@ class RagIntegrationTest(unittest.TestCase):
         self.assertIn("No employment found for year 2006", result)
 
     def test_employment_questions(self):
-        #answer = self.query_router.route_query("What did he do in netconomy?")
-        #self.assertIn("Java Developer", answer)
-        #self.assertIn("SAP-CX (Hybris)", answer)
+        answer = self.query_router.route_query("What did he do in netconomy?")
+        self.assertIn("Java Developer", answer)
+        self.assertIn("SAP-CX", answer)
 
-        #answer = self.query_router.route_query("What were his duties in ibm?")
-        #self.assertIn("Senior Java Developer", answer)
-        #self.assertIn("SAP-CX (Hybris)", answer)
+        answer = self.query_router.route_query("What were his duties in ibm?")
+        self.assertIn("Senior Java Developer", answer)
+        self.assertIn("SAP-CX", answer)
 
         answer = self.query_router.route_query("Did he work in Google?")
         self.assertTrue("no" in answer and "not clear" not in answer)

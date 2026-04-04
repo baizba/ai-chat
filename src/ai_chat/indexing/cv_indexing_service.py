@@ -5,22 +5,31 @@ from ai_chat.indexing.cv_parser import CVParser
 from ai_chat.indexing.models import CVNode, CVNodeLevel
 from ai_chat.vectordb.cv_repository import CvRepository
 
+ROLE_PATTERN = r"Role:\W+(.+?)\W+Period"
+
+FROM_TO_PATTERN = r"([A-Za-z]+\s+\d{4})\s*[-–—]\s*([A-Za-z]+\s+\d{4})"
+
+PERIOD_OF_EMPLOYMENT_SINCE_PATTERN = r"\bperiod of employment\b\W+since\s([A-Za-z]+\s+\d{4})"
+
+PERIOD_OF_EMPLOYMENT_PATTERN = r"\bperiod of employment\b\W+([A-Za-z]+\s+\d{4}\s*[-–—]\s*[A-Za-z]+\s+\d{4})"
+
 STOP_WORDS = ["company", "gmbh", "doo", "dienstleistungs"]
 
 
 def add_employment_range(metadata: dict[str, str], employment_section: str):
-    pattern = re.compile(r"\bperiod of employment\b\W+([A-Za-z]+\s+\d{4}\s*[-–—]\s*[A-Za-z]+\s+\d{4})", re.IGNORECASE)
+    pattern = re.compile(PERIOD_OF_EMPLOYMENT_PATTERN, re.IGNORECASE)
     employment_period = pattern.findall(employment_section)
     if len(employment_period) == 1:
         # capture from and to separately
-        pattern = re.compile(r"([A-Za-z]+\s+\d{4})\s*[-–—]\s*([A-Za-z]+\s+\d{4})")
+        pattern = re.compile(FROM_TO_PATTERN)
         from_, to_ = pattern.findall(employment_period[0])[0]
         metadata["fromYear"] = from_.split(" ")[1]
         metadata["toYear"] = to_.split(" ")[1]
     else:
-        pattern = re.compile(r"\bperiod of employment\b\W+since\s([A-Za-z]+\s+\d{4})", re.IGNORECASE)
+        pattern = re.compile(PERIOD_OF_EMPLOYMENT_SINCE_PATTERN, re.IGNORECASE)
         employment_period = pattern.findall(employment_section)[0]
         metadata["fromYear"] = employment_period.split(" ")[1]
+
 
 def add_aliases(metadata: dict[str, str], company: str):
     company_normalized = company.lower()
@@ -32,6 +41,21 @@ def add_aliases(metadata: dict[str, str], company: str):
 
     aliases = set(words + domains)
     metadata["aliases"] = ",".join(aliases)
+
+
+def add_role(metadata: dict[str, str], employment_section: str):
+    roles = re.compile(ROLE_PATTERN, re.IGNORECASE).findall(employment_section)
+    metadata["role"] = ",".join(roles)
+
+
+# everything before the projects should already be in metadata so we discard it
+def remove_metadata(doc_content: str) -> str:
+    projects = "Projects:"
+    doc_parts = doc_content.split(projects, 1)
+    if len(doc_parts) > 1:
+        return projects + doc_parts[1]
+    return doc_content
+
 
 def to_chroma_documents(root_node: CVNode) -> list:
     chroma_docs = []
@@ -58,13 +82,15 @@ def to_chroma_documents(root_node: CVNode) -> list:
                     metadata["company"] = current_node_title_clean
                     add_employment_range(metadata, current_node_text)
                     add_aliases(metadata, current_node_title_clean)
+                    add_role(metadata, current_node_text)
                 elif section.lower() == "technical skills":
                     metadata["entityType"] = "skills"
                     metadata["category"] = current_node_title_clean
             else:
                 raise RuntimeError(f"should not be here. Node {current_node.id} is invalid")
 
-            doc_content = current_node_text  # content of the document itself
+            # remove metadata stuff from the main content
+            doc_content = remove_metadata(current_node_text)
 
             chroma_doc = {
                 "id": current_node.id,

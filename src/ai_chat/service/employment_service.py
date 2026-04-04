@@ -22,8 +22,9 @@ def extract_employment_period(metadata: dict) -> tuple[int, int]:
 def build_employment_context(employment: RetrievalResult) -> str:
     company = employment.metadata["company"]
     aliases = employment.metadata["aliases"]
-    role = employment.document
-    return f"Company: {company} (Aliases: {aliases}) {role}"
+    role = employment.metadata["role"]
+    description = employment.document
+    return f"Company: {company} (Aliases: {aliases}) Role: {role} Description: {description}"
 
 
 class EmploymentService:
