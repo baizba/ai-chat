@@ -24,7 +24,7 @@ def build_employment_context(employment: RetrievalResult) -> str:
     aliases = employment.metadata["aliases"]
     role = employment.metadata["role"]
     description = employment.document
-    return f"Company: {company} (Aliases: {aliases}) Role: {role} Description: {description}"
+    return f"He was employed at: {company} (Aliases: {aliases}). His role was: {role}. Role description: {description}"
 
 
 class EmploymentService:
