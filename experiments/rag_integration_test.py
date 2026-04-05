@@ -3,8 +3,8 @@ import unittest
 from ai_chat.llm.llm_service import LLMService
 from ai_chat.router.query_router import QueryRouter
 
-
 ALL_COMPANIES = ["JIT-Dienstleistungs", "ecx.io", "Netconomy", "Codecentric"]
+
 
 class RagIntegrationTest(unittest.TestCase):
 
@@ -70,8 +70,8 @@ class RagIntegrationTest(unittest.TestCase):
         self.assertIn("SAP CX", answer)
 
         answer = self.query_router.route_query("Did he work in Google?")
-        self.assertTrue("no" in answer and "not clear" not in answer)
-        self.assertFalse(any([cmp in answer for cmp in ALL_COMPANIES]), f"answer was {answer}")
+        self.assertTrue("could not find the answer" in answer, f"answer: {answer}")
+        self.assertTrue(all([cmp in answer for cmp in ALL_COMPANIES]), f"answer: {answer}")
 
 
 if __name__ == '__main__':

@@ -10,7 +10,7 @@ from ai_chat.vectordb.cv_repository import CvRepository
 
 
 def test_employment_service():
-    employment_service = EmploymentService(CvRepository())
+    employment_service = EmploymentService(CvRepository(), LLMService())
     experience_list = employment_service.handle("List all companies where he worked.")
     print(experience_list)
 

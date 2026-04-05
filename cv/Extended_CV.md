@@ -56,7 +56,7 @@ Served as Senior Developer in the beginning and moved to Architect-Role. Develop
 **Role:** Java Developer focused on Hybris - SAP CX
 **Period of employment:** May 2014 – September 2016
 **Projects:**
-1. Developed multiple E-Commerce shops for customers in Switzerland. My role was developer and included developing and mainting a code base which served as a base platform for multiple webshops. 
+1. Developed multiple E-Commerce shops for customers in Switzerland. My role was developer and included developing and maintaining a code base which served as a base platform for multiple webshops. 
 
 **Skills:** SAP-CX (Hybris), Development, CI, SCRUM, Agile
 
@@ -64,8 +64,8 @@ Served as Senior Developer in the beginning and moved to Architect-Role. Develop
 **Role:** Java Developer
 **Period of employment:** November 2009 – April 2014
 **Projects:**
-1. OpenCms project for almost all mayor insurance companies in Germany. Project was technically very interestingand and challenging because we developed highly modularized platform based on OpenCms. It enabled us to develop basic Product and UI experience which could be easily customized for different insurance companies. Highly modularized and easily deployable solution which was used for 5 years without need for any majoy upgrades or improvements.
-2. Project for Sparkasse Finanzgruppe. Served as developer for a central intranet application used by the company to reserach documetns about securities and realestates.
+1. OpenCms project for almost all mayor insurance companies in Germany. Project was technically very interesting and and challenging because we developed highly modularized platform based on OpenCms. It enabled us to develop basic Product and UI experience which could be easily customized for different insurance companies. Highly modularized and easily deployable solution which was used for 5 years without need for any majoy upgrades or improvements.
+2. Project for Sparkasse Finanzgruppe. Served as developer for a central intranet application used by the company to research documents about securities and realestates.
 
 **Skills:** Development, Consulting, Scrum, Agile
 

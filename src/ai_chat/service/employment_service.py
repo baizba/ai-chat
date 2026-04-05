@@ -3,6 +3,7 @@ from datetime import date
 
 import structlog
 
+from ai_chat.llm import reranker
 from ai_chat.llm.llm_service import LLMService
 from ai_chat.service import prompts
 from ai_chat.vectordb.cv_repository import CvRepository
@@ -19,12 +20,22 @@ def extract_employment_period(metadata: dict) -> tuple[int, int]:
     return year_from_int, year_to_int
 
 
-def build_employment_context(employment: RetrievalResult) -> str:
+def build_full_employment_context(employment: RetrievalResult) -> str:
     company = employment.metadata["company"]
     aliases = employment.metadata["aliases"]
     role = employment.metadata["role"]
     description = employment.document
     return f"He was employed at: {company} (Aliases: {aliases}). His role was: {role}. Role description: {description}"
+
+
+def build_partial_employment_contexts(employments: list[RetrievalResult]) -> list[str]:
+    partial_contexts: list[str] = []
+    for e in employments:
+        company = e.metadata["company"]
+        aliases = e.metadata["aliases"]
+        role = e.metadata["role"]
+        partial_contexts.append(f"He was employed at: {company} (also known as: {aliases}). His role was: {role}.")
+    return partial_contexts
 
 
 class EmploymentService:
@@ -53,7 +64,7 @@ class EmploymentService:
     def get_employment_by_year_range(self, start_year: int, end_year: int) -> str:
         result = self.query_employment()
 
-        employment_list = [] # do not use set to make ordering constant
+        employment_list = []  # do not use set to make ordering constant
         for r in result:
             year_from_int, year_to_int = extract_employment_period(r.metadata)
 
@@ -77,7 +88,7 @@ class EmploymentService:
         before = "before" in question_normalized
         after = "after" in question_normalized
 
-        employment_list = [] # use list ot keep ordering constant
+        employment_list = []  # use list ot keep ordering constant
         for r in result:
             year_from_int, year_to_int = extract_employment_period(r.metadata)
 
@@ -121,20 +132,45 @@ class EmploymentService:
                     seen.add(company_normalized)
                     break  # avoid matching one company multiple times
 
-
         if len(matched_employments) > 0:
             log.info("employment.list_employments", companies=[e.metadata["company"] for e in matched_employments])
             # here goes real llm call
             answers = []
             for employment in matched_employments:
-                context = build_employment_context(employment)
+                context = build_full_employment_context(employment)
                 question_single_employment = f"What did he do in {employment.metadata['company']}?"
                 answer = self.llm_service.answer(prompts.company_role_prompt, question_single_employment, context)
                 answers.append(answer)
             return "\n".join(answers)
 
-        # default return only the list of employments
-        return self.list_employments()
+        # if no match by company name then try cross-encoder to see if any of these looks like an answer
+        employment_contexts = build_partial_employment_contexts(result)
+        scores = reranker.evaluate_employments(question_normalized, employment_contexts)
+        sorted_scores = sorted(scores, reverse=True)
+        abs_threshold = -5.0
+        margin_threshold = 3.0
+        first = sorted_scores[0]
+        second = sorted_scores[1] if len(sorted_scores) > 1 else float('-inf')
+        margin = first - second
+
+        log.info("employment.reranking", companies=[r.metadata["company"] for r in result], scores=scores)
+
+        # in this case nothing is good enough - then maybe user is asking a question about employment history (all companies)
+        all_employments = self.list_employments()
+        default_answer = f"We could not find the answer to your question: {question}\n" + all_employments
+        if first < abs_threshold:
+            return default_answer
+
+        # in this case first one is good candidate
+        if (first > 0 > second) and (margin > margin_threshold):
+            match_index = scores.index(first)
+            best_matched_employment = result[match_index]
+            best_employment_context = build_full_employment_context(best_matched_employment)
+            question_single_employment = f"What did he do in {best_matched_employment.metadata['company']}?"
+            return self.llm_service.answer(prompts.company_role_prompt, question_single_employment, best_employment_context)
+
+        # default return only the list of employments and say you could not answer question
+        return default_answer
 
     def list_employments(self) -> str:
         result = self.query_employment()
