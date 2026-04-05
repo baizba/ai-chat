@@ -39,10 +39,10 @@ class QueryRouter:
 
         distance_threshold = 0.7
         absolute_dist_threshold = 0.05
-        best_match = intents[0].distance
-        second_best_match = intents[1].distance
-        best_domain = intents[0].metadata["domain"]
-        second_best_domain = intents[1].metadata["domain"]
+        best_match = intents[0].score
+        second_best_match = intents[1].score
+        best_domain = intents[0].domain
+        second_best_domain = intents[1].domain
 
         # simply check if the similarity is weak to avoid false domains
         if best_match > distance_threshold:
@@ -54,7 +54,7 @@ class QueryRouter:
             log.error("intent.resolve.ambigous", best_match=best_match, second_best_match=second_best_match, absolute_dist_threshold=absolute_dist_threshold)
             return question + f" -> not clear what this question is about. Is it about {best_domain} or {second_best_domain}?"
 
-        domain = Domain(best_domain)  # decide on strategy
+        domain = best_domain  # decide on strategy
         if domain is None:
             return question + " -> not clear what this question is about"
 

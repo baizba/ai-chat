@@ -17,7 +17,7 @@ services:
     ports:
       - "8100:8100"
     environment:
-      - HF_TOKEN=xx
+      - HF_TOKEN=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
       - HF_HOME=/data/huggingface
       - HF_HUB_CACHE=/data/huggingface/hub
     volumes:

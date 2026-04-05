@@ -13,3 +13,9 @@ class QueryType(Enum):
     FACT = "fact"
     LIST = "list"
     SUMMARY = "summary"
+
+
+class Intent:
+    def __init__(self, domain: Domain, score: float):
+        self.domain = domain
+        self.score = score
