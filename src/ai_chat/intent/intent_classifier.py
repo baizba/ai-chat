@@ -2,7 +2,6 @@ import structlog
 
 from ai_chat.intent.models import Domain, Intent
 from ai_chat.vectordb.intent_repository import IntentRepository
-from ai_chat.vectordb.models import RetrievalResult
 
 log = structlog.get_logger()
 
@@ -21,7 +20,6 @@ class IntentClassifier:
             distance=[t.distance for t in intents]
         )
 
-        #return [RetrievalResult(id=i_.id, distance=i_.distance, document=i_.document, metadata=i_.metadata) for i_ in intents]
         return [Intent(domain=Domain(i_.metadata["domain"]), score=i_.distance) for i_ in intents]
 
     def index_intents(self):

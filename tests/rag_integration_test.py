@@ -15,63 +15,63 @@ class RagIntegrationTest(unittest.TestCase):
     def test_employment_all(self):
         all_employments = "JIT-Dienstleistungs GmbH, ecx.io - IBM Company, Netconomy GmbH, Codecentric doo"
 
-        result = self.query_router.route_query("What is his employment history?")
-        self.assertIn(all_employments, result)
+        response = self.query_router.route_query("What is his employment history?")
+        self.assertIn(all_employments, response.answer)
 
-        result = self.query_router.route_query("What companies he worked for?")
-        self.assertIn(all_employments, result)
+        response = self.query_router.route_query("What companies he worked for?")
+        self.assertIn(all_employments, response.answer)
 
-        result = self.query_router.route_query("List his employers.")
-        self.assertIn(all_employments, result)
+        response = self.query_router.route_query("List his employers.")
+        self.assertIn(all_employments, response.answer)
 
     def test_employment_range(self):
-        result = self.query_router.route_query("Where did he work from 2018 to 2022?")
-        self.assertIn("JIT-Dienstleistungs GmbH, ecx.io - IBM Company", result)
+        response = self.query_router.route_query("Where did he work from 2018 to 2022?")
+        self.assertIn("JIT-Dienstleistungs GmbH, ecx.io - IBM Company", response.answer)
 
-        result = self.query_router.route_query("Where was he employed between 2015 and 2017?")
-        self.assertIn("ecx.io - IBM Company, Netconomy GmbH", result)
+        response = self.query_router.route_query("Where was he employed between 2015 and 2017?")
+        self.assertIn("ecx.io - IBM Company, Netconomy GmbH", response.answer)
 
-        result = self.query_router.route_query("List his employments between 2005 and 2008?")
-        self.assertIn("No employment found for period from 2005 to 2008", result)
+        response = self.query_router.route_query("List his employments between 2005 and 2008?")
+        self.assertIn("No employment found for period from 2005 to 2008", response.answer)
 
     def test_employment_single_year(self):
-        result = self.query_router.route_query("Where did he work 2022?")
-        self.assertIn("JIT-Dienstleistungs GmbH", result)
+        response = self.query_router.route_query("Where did he work 2022?")
+        self.assertIn("JIT-Dienstleistungs GmbH", response.answer)
 
-        result = self.query_router.route_query("Where was he employed in 2010")
-        self.assertIn("Codecentric doo", result)
+        response = self.query_router.route_query("Where was he employed in 2010")
+        self.assertIn("Codecentric doo", response.answer)
 
-        result = self.query_router.route_query("List his employments between 2005 and 2008?")
-        self.assertIn("No employment found for period from 2005 to 2008", result)
+        response = self.query_router.route_query("List his employments between 2005 and 2008?")
+        self.assertIn("No employment found for period from 2005 to 2008", response.answer)
 
     def test_employment_before_after(self):
-        result = self.query_router.route_query("Where did he work before 2022?")
-        self.assertIn("JIT-Dienstleistungs GmbH, ecx.io - IBM Company, Netconomy GmbH, Codecentric doo", result)
+        response = self.query_router.route_query("Where did he work before 2022?")
+        self.assertIn("JIT-Dienstleistungs GmbH, ecx.io - IBM Company, Netconomy GmbH, Codecentric doo", response.answer)
 
-        result = self.query_router.route_query("Where was he employed before 2010")
-        self.assertIn("Codecentric doo", result)
+        response = self.query_router.route_query("Where was he employed before 2010")
+        self.assertIn("Codecentric doo", response.answer)
 
-        result = self.query_router.route_query("List his employments after 2018?")
-        self.assertIn("JIT-Dienstleistungs GmbH, ecx.io - IBM Company", result)
+        response = self.query_router.route_query("List his employments after 2018?")
+        self.assertIn("JIT-Dienstleistungs GmbH, ecx.io - IBM Company", response.answer)
 
-        result = self.query_router.route_query("List his employments after 2050?")
-        self.assertIn("Can not ask question for the future: 2050", result)
+        response = self.query_router.route_query("List his employments after 2050?")
+        self.assertIn("Can not ask question for the future: 2050", response.answer)
 
-        result = self.query_router.route_query("List his employments before 2006?")
-        self.assertIn("No employment found for year 2006", result)
+        response = self.query_router.route_query("List his employments before 2006?")
+        self.assertIn("No employment found for year 2006", response.answer)
 
     def test_employment_questions(self):
-        answer = self.query_router.route_query("What did he do in netconomy?")
-        self.assertIn("Java Developer", answer)
-        self.assertIn("SAP CX", answer)
+        response = self.query_router.route_query("What did he do in netconomy?")
+        self.assertIn("Java Developer", response.answer)
+        self.assertIn("SAP CX", response.answer)
 
-        answer = self.query_router.route_query("What were his duties in ibm?")
-        self.assertIn("Senior Java Developer", answer)
-        self.assertIn("SAP CX", answer)
+        response = self.query_router.route_query("What were his duties in ibm?")
+        self.assertIn("Senior Java Developer", response.answer)
+        self.assertIn("SAP CX", response.answer)
 
-        answer = self.query_router.route_query("Did he work in Google?")
-        self.assertTrue("could not find the answer" in answer, f"answer: {answer}")
-        self.assertTrue(all([cmp in answer for cmp in ALL_COMPANIES]), f"answer: {answer}")
+        response = self.query_router.route_query("Did he work in Google?")
+        self.assertTrue("could not find the answer" in response.answer, response.answer)
+        self.assertTrue(all([cmp in response.answer for cmp in ALL_COMPANIES]), response.answer)
 
 
 if __name__ == '__main__':
