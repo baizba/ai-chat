@@ -7,13 +7,15 @@ import structlog
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
-from ai_chat.retrieval.cv_service import CvService
 from ai_chat.indexing.cv_indexing_service import CvIndexingService
+from ai_chat.intent.intent_classifier import IntentClassifier
 from ai_chat.llm.llm_service import LLMService
 from ai_chat.models import ChatRequest
 from ai_chat.models import ChatResponse
+from ai_chat.retrieval.cv_service import CvService
+from ai_chat.router.query_router import QueryRouter
 from ai_chat.vectordb.cv_repository import CvRepository
-from ai_chat.vectordb.models import CvDataItem
+from ai_chat.vectordb.models import VectorItem
 
 log = structlog.get_logger()
 
@@ -23,6 +25,8 @@ repository = CvRepository()
 cv_service = CvService(repository)
 cv_indexing_service = CvIndexingService(repository)
 llm_service = LLMService()
+classifier = IntentClassifier()
+query_router = QueryRouter(llm_service)
 
 app.add_middleware(
     CORSMiddleware,
@@ -42,6 +46,7 @@ def measure_time():
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     request_id = str(uuid.uuid4())
+    question = request.message
 
     request_log = log.bind(
         request_id=request_id,
@@ -51,35 +56,43 @@ async def chat(request: ChatRequest):
 
     request_log.info(
         "chat.request",
-        message=request.message,
-        message_length=len(request.message)
+        message=question,
+        message_length=len(question)
     )
 
-    with measure_time() as elapsed_time:
-        response = cv_service.query(request.message, request_id)
-
-        context = ""
-        for doc in response.documents:
-            context += doc + "\n"
-
-        answer = llm_service.answer(request.message, context)
+    with (measure_time() as elapsed_time):
+        response = query_router.route_query(question)
 
     request_log.info(
         "chat.response",
         duration_ms=round(elapsed_time()),
-        documents_count=len(response.documents)
+        intent_confidence=response.intent_match.intent_confidence,
+        first_domain=response.intent_match.first.domain if response.intent_match.first is not None else None,
+        second_domain=response.intent_match.second.domain if response.intent_match.second is not None else None,
     )
 
-    return ChatResponse(response=answer)
+    return ChatResponse(response=response.answer)
 
 
-@app.get("/admin/docs/raw")
-async def get_chroma_docs() -> list[CvDataItem]:
+@app.get("/admin/docs/cv/raw")
+async def get_chroma_docs() -> list[VectorItem]:
     return cv_service.get_docs_raw()
 
 
-@app.post("/admin/reindex", status_code=HTTPStatus.NO_CONTENT)
-async def reindex():
-    log.info("admin.reindex.started")
+@app.get("/admin/docs/intent/raw")
+async def get_intent_docs() -> list[VectorItem]:
+    return classifier.get_intents_raw()
+
+
+@app.post("/admin/cv/reindex", status_code=HTTPStatus.NO_CONTENT)
+async def reindex_cv():
+    log.info("admin.reindex.cv.started")
     cv_indexing_service.index_cv()
-    log.info("admin.reindex.finished")
+    log.info("admin.reindex.cv.finished")
+
+
+@app.post("/admin/intents/reindex", status_code=HTTPStatus.NO_CONTENT)
+async def reindex_intent():
+    log.info("admin.reindex.intents.started")
+    classifier.index_intents()
+    log.info("admin.reindex.intents.finished")

@@ -1,8 +1,60 @@
+import re
 from collections import deque
 
 from ai_chat.indexing.cv_parser import CVParser
 from ai_chat.indexing.models import CVNode, CVNodeLevel
 from ai_chat.vectordb.cv_repository import CvRepository
+
+ROLE_PATTERN = r"Role:\W+(.+?)\W+Period"
+
+FROM_TO_PATTERN = r"([A-Za-z]+\s+\d{4})\s*[-–—]\s*([A-Za-z]+\s+\d{4})"
+
+PERIOD_OF_EMPLOYMENT_SINCE_PATTERN = r"\bperiod of employment\b\W+since\s([A-Za-z]+\s+\d{4})"
+
+PERIOD_OF_EMPLOYMENT_PATTERN = r"\bperiod of employment\b\W+([A-Za-z]+\s+\d{4}\s*[-–—]\s*[A-Za-z]+\s+\d{4})"
+
+STOP_WORDS = ["company", "gmbh", "doo", "dienstleistungs"]
+
+
+def add_employment_range(metadata: dict[str, str], employment_section: str):
+    pattern = re.compile(PERIOD_OF_EMPLOYMENT_PATTERN, re.IGNORECASE)
+    employment_period = pattern.findall(employment_section)
+    if len(employment_period) == 1:
+        # capture from and to separately
+        pattern = re.compile(FROM_TO_PATTERN)
+        from_, to_ = pattern.findall(employment_period[0])[0]
+        metadata["fromYear"] = from_.split(" ")[1]
+        metadata["toYear"] = to_.split(" ")[1]
+    else:
+        pattern = re.compile(PERIOD_OF_EMPLOYMENT_SINCE_PATTERN, re.IGNORECASE)
+        employment_period = pattern.findall(employment_section)[0]
+        metadata["fromYear"] = employment_period.split(" ")[1]
+
+
+def add_aliases(metadata: dict[str, str], company: str):
+    company_normalized = company.lower()
+    for stop_word in STOP_WORDS:
+        company_normalized = company_normalized.replace(stop_word, "")
+
+    words = re.compile(r"\w+").findall(company_normalized)
+    domains = re.compile(r"\w+\.\w+").findall(company_normalized)
+
+    aliases = set(words + domains)
+    metadata["aliases"] = ",".join(aliases)
+
+
+def add_role(metadata: dict[str, str], employment_section: str):
+    roles = re.compile(ROLE_PATTERN, re.IGNORECASE).findall(employment_section)
+    metadata["role"] = ",".join(roles)
+
+
+# everything before the projects should already be in metadata so we discard it
+def remove_metadata(doc_content: str) -> str:
+    projects = "Projects:"
+    doc_parts = doc_content.split(projects, 1)
+    if len(doc_parts) > 1:
+        return projects + doc_parts[1]
+    return doc_content
 
 
 def to_chroma_documents(root_node: CVNode) -> list:
@@ -11,26 +63,34 @@ def to_chroma_documents(root_node: CVNode) -> list:
 
     while len(nodes_to_process) > 0:
         current_node = nodes_to_process.popleft()
-        if len(current_node.text.strip()) > 0:
-            doc_content = ""
-            metadata = {
-                "path": current_node.get_path(),
-                "doc_type": "cv"
-            }
+        current_node_text = current_node.text.strip()
+        current_node_title_clean = current_node.title.lstrip("#").strip()
 
-            current_node_title_clean = current_node.title.lstrip("#").strip()
+        if len(current_node_text) > 0:
+            metadata = {
+                "path": current_node.get_path()
+            }
             if current_node.level == CVNodeLevel.SECTION:  # this means section (middle node)
-                doc_content = "Section: " + current_node_title_clean
-                metadata["section"] = current_node_title_clean
+                section = current_node_title_clean
+                metadata["section"] = section
+                metadata["entityType"] = section.lower()
             elif current_node.level == CVNodeLevel.SUBSECTION:  # this means subsection (3rd level node)
-                parent_title_clean = current_node.parent.title.lstrip("#").strip()
-                doc_content = "Section: " + parent_title_clean + "\n" + "Subsection: " + current_node_title_clean
-                metadata["section"] = parent_title_clean
-                metadata["subsection"] = current_node_title_clean
+                section = current_node.parent.title.lstrip("#").strip()
+                metadata["section"] = section
+                if section.lower() == "experience":
+                    metadata["entityType"] = "employment"
+                    metadata["company"] = current_node_title_clean
+                    add_employment_range(metadata, current_node_text)
+                    add_aliases(metadata, current_node_title_clean)
+                    add_role(metadata, current_node_text)
+                elif section.lower() == "technical skills":
+                    metadata["entityType"] = "skills"
+                    metadata["category"] = current_node_title_clean
             else:
                 raise RuntimeError(f"should not be here. Node {current_node.id} is invalid")
 
-            doc_content += "\n\n" + current_node.text.strip()  # content of the document itself
+            # remove metadata stuff from the main content
+            doc_content = remove_metadata(current_node_text)
 
             chroma_doc = {
                 "id": current_node.id,

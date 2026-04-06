@@ -40,7 +40,7 @@ Served as Developer and Architect. Duty was to help the customer implement the r
 **Skills:** Process Automation, BPMN, Consulting, Architecture, DevOps, Camunda 7, Camunda 8, Presales, Message Driven architecture, API Design, Development, SCRUM, Agile
 
 ### ecx.io - IBM Company
-**Role:** Senior Java Developer focused on Hybris (SAP CX)
+**Role:** Senior Java Developer focused on Hybris - SAP CX
 **Period of employment:** March 2017 – September 2020
 **Projects:**
 1. [Schluter Systems](https://www.schlueter-systems.com/)
@@ -53,10 +53,10 @@ Served as Senior Developer in the beginning and moved to Architect-Role. Develop
 **Skills:** SAP-CX (Hybris), Consulting, Architecture, Team-Lead, Development, SCRUM, Agile
 
 ### Netconomy GmbH
-**Role:** Java Developer focused on Hybris (SAP CX)
+**Role:** Java Developer focused on Hybris - SAP CX
 **Period of employment:** May 2014 – September 2016
 **Projects:**
-1. Developed multiple E-Commerce shops for customers in Switzerland. My role was developer and included developing and mainting a code base which served as a base platform for multiple webshops. 
+1. Developed multiple E-Commerce shops for customers in Switzerland. My role was developer and included developing and maintaining a code base which served as a base platform for multiple webshops. 
 
 **Skills:** SAP-CX (Hybris), Development, CI, SCRUM, Agile
 
@@ -64,8 +64,8 @@ Served as Senior Developer in the beginning and moved to Architect-Role. Develop
 **Role:** Java Developer
 **Period of employment:** November 2009 – April 2014
 **Projects:**
-1. OpenCms project for almost all mayor insurance companies in Germany. Project was technically very interestingand and challenging because we developed highly modularized platform based on OpenCms. It enabled us to develop basic Product and UI experience which could be easily customized for different insurance companies. Highly modularized and easily deployable solution which was used for 5 years without need for any majoy upgrades or improvements.
-2. Project for Sparkasse Finanzgruppe. Served as developer for a central intranet application used by the company to reserach documetns about securities and realestates.
+1. OpenCms project for almost all mayor insurance companies in Germany. Project was technically very interesting and and challenging because we developed highly modularized platform based on OpenCms. It enabled us to develop basic Product and UI experience which could be easily customized for different insurance companies. Highly modularized and easily deployable solution which was used for 5 years without need for any majoy upgrades or improvements.
+2. Project for Sparkasse Finanzgruppe. Served as developer for a central intranet application used by the company to research documents about securities and realestates.
 
 **Skills:** Development, Consulting, Scrum, Agile
 
@@ -79,10 +79,13 @@ Served as Senior Developer in the beginning and moved to Architect-Role. Develop
 - Intro to Self-Driving Cars (2020), Introduction to Data Science (2020)
 - A Basic Training in Communication (2012)
 
-## Technical Skills (Technical knowledge)
+## Technical Skills
 
-### Languages & Frameworks 
-Java, Spring, JavaScript, TypeScript, Groovy, Python 
+### Languages
+Java, JavaScript, TypeScript, Groovy, Python, Kotlin
+
+### Frameworks
+Spring, JUnit, Mockito, Angular, osmdroid
 
 ### Tools & Platforms
 Camunda 7 & 8 (Modeler, Operate, Tasklist), Maven, Docker, Kubernetes, GitHub, CI/CD (Jenkins), AWS. OpenAPI, Azure, REST/SOAP, Kafka
