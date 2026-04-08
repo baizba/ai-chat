@@ -20,6 +20,8 @@ services:
       - HF_TOKEN=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
       - HF_HOME=/data/huggingface
       - HF_HUB_CACHE=/data/huggingface/hub
+      - CHROMA_HOST = chroma
+      - CHROMA_PORT = 8000
     volumes:
       - /data/huggingface:/data/huggingface
     networks:

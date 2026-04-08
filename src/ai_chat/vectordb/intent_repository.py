@@ -1,3 +1,4 @@
+import os
 from typing import List
 
 import chromadb
@@ -22,7 +23,9 @@ def get_metadata(domain: Domain) -> dict:
 class IntentRepository:
     def __init__(self):
         # chroma connection
-        self.client = chromadb.HttpClient(host="localhost", port=8000)
+        chroma_host = os.getenv("CHROMA_HOST", "localhost")
+        chroma_port = int(os.getenv("CHROMA_PORT", "8000"))
+        self.client = chromadb.HttpClient(host=chroma_host, port=chroma_port)
 
         # embedding model
         model = SentenceTransformer('all-MiniLM-L6-v2')

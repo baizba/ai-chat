@@ -1,4 +1,5 @@
 # wrapper matching new Chroma interface
+import os
 from typing import List, Dict
 
 import chromadb
@@ -17,7 +18,9 @@ log = structlog.get_logger()
 class CvRepository:
     def __init__(self):
         # chroma connection
-        self.client = chromadb.HttpClient(host="localhost", port=8000)
+        chroma_host = os.getenv("CHROMA_HOST", "localhost")
+        chroma_port = int(os.getenv("CHROMA_PORT", "8000"))
+        self.client = chromadb.HttpClient(host=chroma_host, port=chroma_port)
 
         # embedding model
         model = SentenceTransformer('all-MiniLM-L6-v2')
