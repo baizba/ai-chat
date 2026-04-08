@@ -97,3 +97,6 @@ The goal is to ensure consistent behavior across different phrasings and to dete
 
 ### Everything with docker
 This mode is convenient to run all in cloud: **docker compose up** in the ai-chat project
+
+When starting first time open the swagger docs. Perform Indexing of the Intents and CV.
+Then you can use the chat endpoint to ask questions.
