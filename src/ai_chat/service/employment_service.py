@@ -153,7 +153,14 @@ class EmploymentService:
         second = sorted_scores[1] if len(sorted_scores) > 1 else float('-inf')
         margin = first - second
 
-        log.info("employment.reranking", companies=[r.metadata["company"] for r in result], scores=scores)
+        log.info(
+            "employment.reranking",
+            companies=[r.metadata["company"] for r in result],
+            scores=scores,
+            margin=margin,
+            first=first,
+            second=second
+        )
 
         # in this case nothing is good enough - then maybe user is asking a question about employment history (all companies)
         all_employments = self.list_employments()
@@ -169,8 +176,8 @@ class EmploymentService:
             question_single_employment = f"What did he do in {best_matched_employment.metadata['company']}?"
             return self.llm_service.answer(prompts.company_role_prompt, question_single_employment, best_employment_context)
 
-        # default return only the list of employments and say you could not answer question
-        return default_answer
+        # default return only the list of employments
+        return all_employments
 
     def list_employments(self) -> str:
         result = self.query_employment()
