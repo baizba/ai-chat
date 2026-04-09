@@ -17,11 +17,11 @@ services:
     ports:
       - "8100:8100"
     environment:
-      - HF_TOKEN=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
+      - HF_TOKEN=${HF_TOKEN}
       - HF_HOME=/data/huggingface
       - HF_HUB_CACHE=/data/huggingface/hub
-      - CHROMA_HOST = chroma
-      - CHROMA_PORT = 8000
+      - CHROMA_HOST=chroma
+      - CHROMA_PORT=8000
     volumes:
       - /data/huggingface:/data/huggingface
     networks:
