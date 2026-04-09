@@ -12,6 +12,17 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# run once so it i can later avoid downloading and work offline
+RUN python - <<EOF
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, AutoModelForCausalLM
+
+AutoTokenizer.from_pretrained('BAAI/bge-reranker-large')
+AutoModelForSequenceClassification.from_pretrained('BAAI/bge-reranker-large')
+
+AutoTokenizer.from_pretrained('microsoft/Phi-3-mini-4k-instruct')
+AutoModelForCausalLM.from_pretrained('microsoft/Phi-3-mini-4k-instruct')
+EOF
+
 COPY src ./src
 COPY cv ./cv
 
