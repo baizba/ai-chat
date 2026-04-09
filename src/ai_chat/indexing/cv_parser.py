@@ -4,7 +4,7 @@ from ai_chat.indexing.models import CVNode, CVNodeLevel
 
 
 def stable_id(value: str) -> str:
-    return hashlib.sha256(value.encode("utf-8")).hexdigest()
+    return hashlib.sha256(value.encode("utf-8")).hexdigest()[:8]
 
 
 class CVParser:

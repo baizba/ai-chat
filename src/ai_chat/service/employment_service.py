@@ -38,6 +38,12 @@ def build_partial_employment_contexts(employments: list[RetrievalResult]) -> lis
     return partial_contexts
 
 
+def employments_formatted(employments_retrieved: list[RetrievalResult]) -> str:
+    companies: list = [r.metadata["company"] for r in employments_retrieved]
+    log.info("employment.list_employments", companies=companies)
+    return f"Branislav worked in: {', '.join(companies)}"
+
+
 class EmploymentService:
     def __init__(self, repository: CvRepository, llm_service: LLMService) -> None:
         self.repository = repository
@@ -112,7 +118,7 @@ class EmploymentService:
         return f"No employment found for year {year_ref}"
 
     def get_employment_by_company_or_list(self, question: str) -> str:
-        result = self.query_employment()
+        employments_retrieved = self.query_employment()
         question_normalized = question.lower()
         question_tokens = re.split(r"\W+", question_normalized)
 
@@ -120,7 +126,7 @@ class EmploymentService:
         seen = set()  # used only to avoid possible duplicates in companies
 
         # check if user asked for company by full name or by alias
-        for r in result:
+        for r in employments_retrieved:
             company_normalized = r.metadata["company"].lower()
             if company_normalized in question_normalized and company_normalized not in seen:
                 matched_employments.append(r)
@@ -144,26 +150,26 @@ class EmploymentService:
             return "\n".join(answers)
 
         # if no match by company name then try cross-encoder to see if any of these looks like an answer
-        employment_contexts = build_partial_employment_contexts(result)
+        employment_contexts = build_partial_employment_contexts(employments_retrieved)
         scores = reranker.evaluate_employments(question_normalized, employment_contexts)
         sorted_scores = sorted(scores, reverse=True)
         abs_threshold = -5.0
         margin_threshold = 3.0
         first = sorted_scores[0]
         second = sorted_scores[1] if len(sorted_scores) > 1 else float('-inf')
-        margin = first - second
+        margin = round(first - second, 2)
 
         log.info(
             "employment.reranking",
-            companies=[r.metadata["company"] for r in result],
-            scores=scores,
+            companies=[r.metadata["company"] for r in employments_retrieved],
+            scores=sorted_scores,
             margin=margin,
             first=first,
             second=second
         )
 
         # in this case nothing is good enough - then maybe user is asking a question about employment history (all companies)
-        all_employments = self.list_employments()
+        all_employments = employments_formatted(employments_retrieved)
         default_answer = f"We could not find the answer to your question: {question}\n" + all_employments
         if first < abs_threshold:
             return default_answer
@@ -171,19 +177,13 @@ class EmploymentService:
         # in this case first one is good candidate
         if (first > 0 > second) and (margin > margin_threshold):
             match_index = scores.index(first)
-            best_matched_employment = result[match_index]
+            best_matched_employment = employments_retrieved[match_index]
             best_employment_context = build_full_employment_context(best_matched_employment)
             question_single_employment = f"What did he do in {best_matched_employment.metadata['company']}?"
             return self.llm_service.answer(prompts.company_role_prompt, question_single_employment, best_employment_context)
 
         # default return only the list of employments
         return all_employments
-
-    def list_employments(self) -> str:
-        result = self.query_employment()
-        companies: list = [r.metadata["company"] for r in result]
-        log.info("employment.list_employments", companies=companies)
-        return f"Branislav worked in: {', '.join(companies)}"
 
     def query_employment(self) -> list[RetrievalResult]:
         metadata_employment = {"entityType": "employment"}
