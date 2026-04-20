@@ -17,8 +17,17 @@ log = structlog.get_logger()
 NAME_ALIASES = ["branislav vidovic", "branislav", "vidovic"]
 
 
-def create_routing_response(answer: str, intent_confidence: IntentConfidence, first: Intent | None, second: Intent | None) -> RoutingResponse:
+def create_routing_response(answer: str, intent_confidence: IntentConfidence, first: Intent, second: Intent) -> RoutingResponse:
     intent_match = IntentMatch(first, second, intent_confidence)
+
+    if intent_confidence == IntentConfidence.LOW:
+        final_answer = f"I'm not fully certain, but if you mean {first.domain}, this could be the answer:\n" + answer
+        return RoutingResponse(intent_match, final_answer)
+
+    if intent_confidence == IntentConfidence.MEDIUM:
+        final_answer = f"It seems you are asking about {first.domain}, this could be the answer:\n" + answer
+        return RoutingResponse(intent_match, final_answer)
+
     return RoutingResponse(intent_match, answer)
 
 
@@ -46,8 +55,12 @@ class QueryRouter:
 
         intents = self.intent_classifier.get_intents(question)
 
-        if intents is None or len(intents) < 2:
-            return create_routing_response(f"{question} -> not clear what this question is about", IntentConfidence.LOW, None, None)
+        # if we did not find any intents or have less than 2 then there is a big problem
+        if intents is None:
+            raise Exception("Intent retrieval failed completely")
+
+        if len(intents) < 2:
+            raise Exception("Intent retrieval returned insufficient results (expected 2)")
 
         distance_threshold = 0.7
         absolute_dist_threshold = 0.05
@@ -58,35 +71,25 @@ class QueryRouter:
         best_domain = best.domain
         second_best_domain = second_best.domain
 
+        # if no handler then there is nothing we can do
+        handler = self.handlers.get(best_domain)
+        log.info("intent.routing", question=question, domain=best_domain, handler=handler)
+
+        if handler is None:
+            raise Exception(f"No handler registered for domain: {best_domain}")
+
         # simply check if the similarity is weak to avoid false domains
         if best_match > distance_threshold:
             log.error("intent.resolve.lowconfidence", best_match=best_match, distance_threshold=distance_threshold)
-            return create_routing_response(
-                f"{question} -> not clear what this question is about. Is it really about {best_domain}?",
-                IntentConfidence.LOW,
-                best,
-                second_best
-            )
+            intent_confidence = IntentConfidence.LOW
 
         # if we resolve two different intents but really close then confidence is low
-        if best_domain != second_best_domain and second_best_match - best_match < absolute_dist_threshold:
+        elif best_domain != second_best_domain and second_best_match - best_match < absolute_dist_threshold:
             log.error("intent.resolve.ambigous", best_match=best_match, second_best_match=second_best_match, absolute_dist_threshold=absolute_dist_threshold)
-            return create_routing_response(
-                f"{question} -> not clear what this question is about. Is it about {best_domain} or {second_best_domain}?",
-                IntentConfidence.MEDIUM,
-                best,
-                second_best
-            )
+            intent_confidence = IntentConfidence.MEDIUM
 
-        handler = self.handlers.get(best_domain)
-        log.info("intent.routing", question=question, domain=best_domain, handler=handler)
-        if handler is None:
-            # return "This platform answers only questions about CV of Branislav"
-            return create_routing_response(
-                "This platform answers only questions about CV of Branislav",
-                IntentConfidence.LOW,
-                best,
-                second_best
-            )
+        # if none of those match then we are quite certain we have a good match
+        else:
+            intent_confidence = IntentConfidence.HIGH
 
-        return create_routing_response(handler(question), IntentConfidence.HIGH, best, second_best)
+        return create_routing_response(handler(question), intent_confidence, best, second_best)
