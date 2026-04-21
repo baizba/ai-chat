@@ -1,7 +1,9 @@
 import unittest
 
+from ai_chat.intent.intent_classifier import IntentClassifier
 from ai_chat.llm.llm_service import LLMService
 from ai_chat.router.query_router import QueryRouter
+from ai_chat.vectordb.cv_repository import CvRepository
 
 ALL_COMPANIES = ["JIT-Dienstleistungs", "ecx.io", "Netconomy", "Codecentric"]
 
@@ -10,7 +12,7 @@ class RagIntegrationTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.query_router = QueryRouter(LLMService())
+        cls.query_router = QueryRouter(LLMService(), CvRepository(), IntentClassifier())
 
     def test_employment_all(self):
         all_employments = "JIT-Dienstleistungs GmbH, ecx.io - IBM Company, Netconomy GmbH, Codecentric doo"

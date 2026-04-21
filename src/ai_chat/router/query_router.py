@@ -32,13 +32,12 @@ def create_routing_response(answer: str, intent_confidence: IntentConfidence, fi
 
 
 class QueryRouter:
-    def __init__(self, llm_service: LLMService) -> None:
-        repository = CvRepository()
-        self.intent_classifier = IntentClassifier()
-        self.employment_service = EmploymentService(repository, llm_service)
-        self.skills_service = SkillsService(repository, llm_service)
-        self.profile_service = ProfileService(repository, llm_service)
-        self.certificate_service = CertificateService(repository, llm_service)
+    def __init__(self, llm_service: LLMService, cv_repository: CvRepository, intent_classifier: IntentClassifier) -> None:
+        self.intent_classifier = intent_classifier
+        self.employment_service = EmploymentService(cv_repository, llm_service)
+        self.skills_service = SkillsService(cv_repository, llm_service)
+        self.profile_service = ProfileService(cv_repository, llm_service)
+        self.certificate_service = CertificateService(cv_repository, llm_service)
 
         self.handlers: dict[Domain, Callable] = {
             Domain.EMPLOYMENT: self.employment_service.handle,

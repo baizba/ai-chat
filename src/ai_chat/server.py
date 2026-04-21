@@ -21,12 +21,12 @@ log = structlog.get_logger()
 
 app = FastAPI()
 
-repository = CvRepository()
-cv_service = CvService(repository)
-cv_indexing_service = CvIndexingService(repository)
+cv_repository = CvRepository()
+cv_service = CvService(cv_repository)
+cv_indexing_service = CvIndexingService(cv_repository)
 llm_service = LLMService()
-classifier = IntentClassifier()
-query_router = QueryRouter(llm_service)
+intent_classifier = IntentClassifier()
+query_router = QueryRouter(llm_service, cv_repository, intent_classifier)
 
 app.add_middleware(
     CORSMiddleware,
@@ -81,7 +81,7 @@ async def get_chroma_docs() -> list[VectorItem]:
 
 @app.get("/admin/docs/intent/raw")
 async def get_intent_docs() -> list[VectorItem]:
-    return classifier.get_intents_raw()
+    return intent_classifier.get_intents_raw()
 
 
 @app.post("/admin/cv/reindex", status_code=HTTPStatus.NO_CONTENT)
@@ -94,5 +94,5 @@ async def reindex_cv():
 @app.post("/admin/intents/reindex", status_code=HTTPStatus.NO_CONTENT)
 async def reindex_intent():
     log.info("admin.reindex.intents.started")
-    classifier.index_intents()
+    intent_classifier.index_intents()
     log.info("admin.reindex.intents.finished")
