@@ -2,3 +2,5 @@
 ai-env
 src/__pycache__
 .env
+chroma
+huggingface

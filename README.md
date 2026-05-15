@@ -92,10 +92,12 @@ The goal is to ensure consistent behavior across different phrasings and to dete
 ## Running
 
 ### Locally for debugging
-1. Start chroma in the docker-compose-yaml
-2. Run this in the project dir: $env:PYTHONPATH="src"; uvicorn ai_chat.server:app --reload --port 8100
+1. run pip install -r requirements.txt
+2. Start chroma in the docker-compose-yaml or manually chroma run --host 0.0.0.0 --port 8000 &
+3. Run this in the project dir: $env:PYTHONPATH="src"; uvicorn ai_chat.server:app --reload --port 8100
 
 ### Everything with docker
+You will need to create .env file and set your HF_TOKEN to use huggingface models.
 This mode is convenient to run all in cloud: **docker compose up** in the ai-chat project
 
 When starting first time open the swagger docs. Perform Indexing of the Intents and CV.

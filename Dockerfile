@@ -18,7 +18,7 @@ COPY cv ./cv
 ENV PYTHONPATH=/app/src
 
 # run once so it can later avoid downloading and work offline
-RUN python -c "from ai_chat.llm.model_init import init_models; init_models()"
+# RUN python -c "from ai_chat.llm.model_init import init_models; init_models()"
 
 EXPOSE 8100
 CMD ["uvicorn", "ai_chat.server:app", "--host", "0.0.0.0", "--port", "8100"]
